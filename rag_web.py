@@ -4,7 +4,7 @@ import streamlit as st
 from rag_core import RAGCore
 import logging
 import os
-import config # Importa as configurações globais
+import src.config as config # Importa as configurações globais
 from datetime import datetime # Para timestamps
 
 # Configuração de logging

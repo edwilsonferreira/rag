@@ -10,7 +10,7 @@ import logging
 from typing import List, Tuple
 
 # Importa as configurações do arquivo config.py
-import config
+import config as config
 
 # Configuração de logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

@@ -4,7 +4,7 @@ from rag_core import RAGCore
 import logging
 import readline # Para melhor experiência de input
 from datetime import datetime # Para timestamps
-import config # Para acessar o flag SHOW_CHAT_TIMESTAMPS
+import src.config as config # Para acessar o flag SHOW_CHAT_TIMESTAMPS
 
 # Configuração de logging (opcional, pode ser controlado pelo rag_core)
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
