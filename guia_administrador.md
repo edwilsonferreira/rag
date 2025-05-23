@@ -74,8 +74,10 @@ Se o Python (versão 3.10 ou 3.11) não estiver instalado, baixe-o em [python.or
     ```bash
     .venv\Scripts\Activate.ps1
     ```
-    (Você pode precisar ajustar a política de execução no PowerShell: `Set-ExecutionPolicy Unrestricted -Scope Process`)
-
+    Você pode precisar ajustar a política de execução no PowerShell:
+    ```bash
+    Set-ExecutionPolicy Unrestricted -Scope Process
+    ```
     Seu prompt de terminal deve mudar para indicar que o ambiente virtual está ativo (ex: `(.venv) seu_prompt$`).
 
 ## 5. Configuração do Ollama
@@ -89,22 +91,25 @@ O sistema é configurado para usar um modelo LLM padrão definido em `config.py`
 Abra um novo terminal (ou use o atual, fora do ambiente virtual se preferir, pois o comando `ollama` é global) e execute:
 ```bash
 ollama pull <nome_do_modelo_ollama>
+```
 Por exemplo, para o padrão llama3:latest:
 
-Bash
+```bash
 ollama pull llama3:latest
+```
 Para verificar os modelos baixados:
 
-Bash
+```bash
 ollama list
-5.3. Garantir que o Servidor Ollama Esteja em Execução
+```
+### 5.3. Garantir que o Servidor Ollama Esteja em Execução
 
 O servidor Ollama geralmente inicia automaticamente após a instalação e roda em segundo plano. Se a aplicação Python não conseguir se conectar, verifique se o serviço Ollama está ativo. Em alguns sistemas, pode ser necessário iniciá-lo manualmente.
 
-6. Instalação do Software (Dependências Python)
+## 6. Instalação do Software (Dependências Python)
 Com o ambiente virtual ativo, instale as dependências Python listadas no arquivo requirements.txt.
 
-6.1. Arquivo requirements.txt
+### 6.1. Arquivo requirements.txt
 
 Este arquivo deve conter as seguintes bibliotecas (ou as versões especificadas pelo desenvolvedor):
 
@@ -114,12 +119,15 @@ faiss-cpu
 ollama
 numpy
 streamlit
-6.2. Comando de Instalação
+
+### 6.2. Comando de Instalação
 
 Navegue até a pasta raiz do projeto (seu_projeto_rag/) no terminal (com o ambiente virtual ativo) e execute:
 
-Bash
+```bash
 pip install -r requirements.txt
+```
+
 Isso instalará todas as bibliotecas necessárias e suas dependências.
 
 Principais dependências:
@@ -130,10 +138,11 @@ faiss-cpu: Para criar e pesquisar em um índice vetorial eficiente (versão CPU)
 ollama: Cliente Python para interagir com o servidor Ollama.
 numpy: Para operações numéricas, dependência de FAISS e SentenceTransformers.
 streamlit: Para criar e servir a interface web do usuário.
-7. Configuração do Sistema (config.py)
+
+## 7. Configuração do Sistema (config.py)
 O arquivo config.py centraliza as configurações globais do sistema. Modifique este arquivo para ajustar o comportamento padrão:
 
-Python
+```
 # config.py
 
 # Flag para controlar a impressão de chunks recuperados para depuração
@@ -165,52 +174,68 @@ DEFAULT_DATA_FOLDER: O nome da subpasta onde os arquivos PDF de entrada devem se
 DEFAULT_CHUNK_SIZE: O tamanho alvo (aproximado em caracteres) para cada chunk de texto.
 DEFAULT_CHUNK_OVERLAP: O tamanho da sobreposição (aproximado em caracteres) entre chunks consecutivos.
 DEFAULT_RETRIEVAL_K: O número de chunks de texto mais relevantes a serem recuperados para cada consulta.
-8. Preparando Dados de Entrada
+```
+
+## 8. Preparando Dados de Entrada
 Crie a pasta data (ou o nome especificado em DEFAULT_DATA_FOLDER no config.py) dentro da pasta raiz do projeto (seu_projeto_rag/).
 Copie todos os arquivos PDF que você deseja que o sistema processe para dentro desta pasta data/.
 Qualidade dos PDFs: O sistema funciona melhor com PDFs que contêm texto digital (selecionável). PDFs que são apenas imagens escaneadas (sem uma camada de OCR - Reconhecimento Óptico de Caracteres) não produzirão texto para indexação, a menos que uma etapa de OCR externa seja aplicada previamente. O sistema atual não inclui OCR.
-9. Executando o Sistema
+
+## 9. Executando o Sistema
 Com o ambiente preparado, Ollama rodando, dependências instaladas, config.py ajustado e PDFs na pasta data:
 
 Certifique-se de que seu ambiente virtual está ativo.
 Navegue até a pasta raiz do projeto (seu_projeto_rag/) no terminal.
 Execute o seguinte comando para iniciar a interface web Streamlit:
-Bash
+
+```bash
 streamlit run rag_web.py
+```
+
 Ou, para a interface de terminal (se ainda estiver sendo utilizada):
-Bash
+
+```bash
 python rag_terminal.py
-Primeira Execução:
+```
+- Primeira Execução:
 Pode levar algum tempo, pois o modelo de embedding será baixado (se for a primeira vez que é usado).
 Os documentos PDF na pasta data/ serão processados, os embeddings serão gerados e o índice FAISS será construído. Isso também pode levar tempo dependendo do número e tamanho dos PDFs.
 A interface Streamlit mostrará uma mensagem "Inicializando o Sistema RAG..." durante este processo.
-Acessando a Interface Web:
+
+- Acessando a Interface Web:
 Após a inicialização, o Streamlit geralmente abrirá automaticamente a interface em seu navegador web padrão.
 Caso não abra, o terminal exibirá URLs locais (ex: Local URL: http://localhost:8501) que você pode abrir manualmente em seu navegador.
-10. Solução de Problemas Comuns
-Erro "Ollama server not running" ou Conexão Recusada:
+
+## 10. Solução de Problemas Comuns
+- Erro "Ollama server not running" ou Conexão Recusada:
 Verifique se o serviço/aplicação Ollama está realmente em execução no seu sistema.
 Modelo LLM/Embedding Não Encontrado:
 Para Ollama: Use ollama list para verificar os modelos baixados. Use ollama pull <nome_modelo> se necessário.
 Para SentenceTransformer: Verifique a conexão com a internet para o download inicial do modelo. Verifique se há erros de digitação no nome do modelo em config.py.
-Nenhum Arquivo PDF Processado ou "Informação não disponível em RAGCore":
+
+- Nenhum Arquivo PDF Processado ou "Informação não disponível em RAGCore":
 Verifique se os arquivos PDF estão na pasta data/ correta.
 Verifique se os PDFs contêm texto extraível.
 Confirme se as modificações em rag_core.py para o atributo processed_pdf_files foram aplicadas e salvas corretamente.
 Reinicie completamente a aplicação Streamlit (Ctrl+C e streamlit run rag_web.py novamente) para limpar qualquer cache de objetos desatualizados.
-Respostas de Baixa Qualidade:
+
+- Respostas de Baixa Qualidade:
 Consulte as sugestões no guia de desenvolvimento ou na documentação do projeto sobre como melhorar a qualidade (ajuste de chunking, modelos de embedding, modelo LLM, prompt, parâmetro k).
 Ative PRINT_DEBUG_CHUNKS = True em config.py para inspecionar os chunks recuperados.
 Erros de asyncio ou RuntimeError: no running event loop (especialmente com Python 3.12+):
 Considere usar uma versão do Python mais estabelecida como 3.10 ou 3.11, pois bibliotecas como Streamlit podem ter melhor compatibilidade.
-11. Manutenção
+
+## 11. Manutenção
 Atualizando Modelos:
-Ollama LLMs: Use ollama pull <nome_modelo>:latest para obter a versão mais recente de um modelo.
+Ollama LLMs: Use ```ollama pull <nome_modelo>:latest``` para obter a versão mais recente de um modelo.
 Modelos de Embedding: Se você mudar DEFAULT_EMBEDDING_MODEL em config.py, o sistema RAG irá (ao reiniciar) reprocessar os embeddings na próxima vez que for inicializado, pois o RAGCore é recriado.
-Adicionando/Removendo PDFs:
+
+- Adicionando/Removendo PDFs:
 Se você adicionar, remover ou modificar arquivos PDF na pasta data/, você precisará reiniciar a aplicação Streamlit (ou a aplicação de terminal). Isso fará com que o RAGCore seja recriado e reprocesse todos os documentos na pasta data/, atualizando o índice.
-Atualizando Dependências:
+
+- Atualizando Dependências:
 Periodicamente, você pode querer atualizar as bibliotecas Python para as versões mais recentes:
-Bash
+```bash
 pip install --upgrade -r requirements.txt
+```
 Faça isso com cautela e teste após as atualizações, pois novas versões podem introduzir alterações incompatíveis.
