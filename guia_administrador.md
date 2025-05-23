@@ -34,16 +34,16 @@ Este documento fornece um guia completo para administradores de sistema sobre co
 
 ## 3. Estrutura do Projeto
 
-Certifique-se de que o software está organizado com a seguinte estrutura de diretórios e arquivos:
+Certifique-se de que o software está organizado com a seguinte estrutura de diretórios e arquivos:  
 
-seu_projeto_rag/
-├── data/                 # Pasta para armazenar os arquivos PDF de entrada
-│   └── exemplo.pdf
-│   └── outro_documento.pdf
-├── config.py             # Arquivo de configuração global
-├── rag_core.py           # Lógica principal do sistema RAG
-├── rag_web.py            # Interface web com Streamlit
-└── requirements.txt      # Lista de dependências Python
+seu_projeto_rag/  
+├── data/                 # Pasta para armazenar os arquivos PDF de entrada  
+│   └── exemplo.pdf  
+│   └── outro_documento.pdf  
+├── config.py             # Arquivo de configuração global  
+├── rag_core.py           # Lógica principal do sistema RAG  
+├── rag_web.py            # Interface web com Streamlit  
+└── requirements.txt      # Lista de dependências Python  
 
 
 ## 4. Preparação do Ambiente
