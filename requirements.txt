@@ -4,3 +4,4 @@ faiss-cpu
 ollama
 numpy
 streamlit
+chromadb

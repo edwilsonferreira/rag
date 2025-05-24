@@ -3,17 +3,18 @@
 import os
 import fitz  # PyMuPDF
 from sentence_transformers import SentenceTransformer
-import faiss
 import numpy as np
 import ollama
 import logging
-from typing import List, Tuple
+from typing import List, Dict, Any
+import json 
+import time 
 
-# Importa as configurações do arquivo config.py
-import config as config
+import config
+import chromadb
 
-# Configuração de logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 class RAGCore:
     def __init__(self,
@@ -21,163 +22,232 @@ class RAGCore:
                  model_name: str = config.DEFAULT_EMBEDDING_MODEL,
                  ollama_model: str = config.DEFAULT_OLLAMA_MODEL):
         self.data_folder = data_folder
-        self.embedding_model = None
-        self.index = None
-        self.text_chunks_corpus = []
-        self.processed_pdf_files = []
-
         self.configured_ollama_model = ollama_model
         self.configured_embedding_model_name = model_name
+        
+        self.text_chunks_corpus = [] 
+        self.processed_pdf_files = [] 
 
+        logger.info(f"Usando modelo de embedding: {self.configured_embedding_model_name}")
         try:
-            logging.info(f"Carregando modelo de embedding: {self.configured_embedding_model_name}")
-            self.embedding_model = SentenceTransformer(self.configured_embedding_model_name)
-            logging.info("Modelo de embedding carregado com sucesso.")
+            self.embedding_model_st = SentenceTransformer(self.configured_embedding_model_name)
+            logger.info(f"Modelo SentenceTransformer '{self.configured_embedding_model_name}' carregado.")
         except Exception as e:
-            logging.error(f"Erro ao carregar o modelo SentenceTransformer '{self.configured_embedding_model_name}': {e}")
+            logger.error(f"Erro crítico ao carregar o modelo SentenceTransformer '{self.configured_embedding_model_name}': {e}", exc_info=True)
+            raise
+
+        logger.info(f"Inicializando ChromaDB em: {config.CHROMA_DB_PATH} com coleção: {config.CHROMA_COLLECTION_NAME}")
+        try:
+            self.chroma_client = chromadb.PersistentClient(path=config.CHROMA_DB_PATH)
+            self.collection = self.chroma_client.get_or_create_collection(name=config.CHROMA_COLLECTION_NAME)
+            logger.info(f"Conectado/Criado coleção ChromaDB: '{config.CHROMA_COLLECTION_NAME}'.")
+        except Exception as e:
+            logger.error(f"Erro ao inicializar ChromaDB: {e}", exc_info=True)
             raise
 
         self._ensure_data_folder()
-        self._process_documents()
+        self._load_or_process_documents()
+
+    def _load_processed_files_status(self) -> Dict[str, Dict[str, Any]]:
+        try:
+            if os.path.exists(config.PROCESSED_FILES_STATUS_JSON):
+                with open(config.PROCESSED_FILES_STATUS_JSON, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+            return {}
+        except Exception as e:
+            logger.warning(f"Não foi possível carregar o status dos arquivos processados ('{config.PROCESSED_FILES_STATUS_JSON}'): {e}. Tratando como novo processamento.")
+            return {}
+
+    def _save_processed_files_status(self, status: Dict[str, Dict[str, Any]]):
+        try:
+            with open(config.PROCESSED_FILES_STATUS_JSON, 'w', encoding='utf-8') as f:
+                json.dump(status, f, indent=4)
+            logger.info(f"Status dos arquivos processados salvo em '{config.PROCESSED_FILES_STATUS_JSON}'.")
+        except Exception as e:
+            logger.error(f"Erro ao salvar o status dos arquivos processados: {e}", exc_info=True)
 
     def _ensure_data_folder(self):
         if not os.path.exists(self.data_folder):
-            logging.warning(f"Pasta de dados '{self.data_folder}' não encontrada. Criando...")
+            logger.warning(f"Pasta de dados '{self.data_folder}' não encontrada. Criando...")
             os.makedirs(self.data_folder)
-            logging.info(f"Pasta '{self.data_folder}' criada.")
 
     def _extract_text_from_pdf(self, pdf_path: str) -> str:
         try:
             doc = fitz.open(pdf_path)
-            text = ""
-            for page_num in range(len(doc)):
-                page = doc.load_page(page_num)
-                text += page.get_text("text")
+            text = "".join(page.get_text("text") for page in doc)
             doc.close()
             return text
         except Exception as e:
-            logging.error(f"Erro ao extrair texto do PDF '{pdf_path}': {e}")
+            logger.error(f"Erro ao extrair texto do PDF '{pdf_path}': {e}", exc_info=True)
             return ""
 
     def _chunk_text(self, text: str, chunk_size: int = config.DEFAULT_CHUNK_SIZE, overlap: int = config.DEFAULT_CHUNK_OVERLAP) -> List[str]:
         words = text.split()
-        if not words: return []
-        chunks = []
+        if not words:
+            return []
+
+        chunks_list = []
         current_chunk_words = []
         current_length = 0
-        approx_overlap_word_count = max(1, int(overlap * 0.2))
+        
+        approx_overlap_word_count = max(0, int(overlap / 6)) if overlap > 0 else 0 # Média de 6 chars/palavra+espaço
 
-        for word in words:
+        idx = 0
+        while idx < len(words):
+            word = words[idx]
+            # Calcula o tamanho que a palavra adicionaria (incluindo espaço, se não for a primeira palavra do chunk)
             word_len_to_add = len(word) + (1 if current_chunk_words else 0)
+
+            # Se a palavra estourar o chunk_size E já tivermos palavras no chunk atual
             if current_length + word_len_to_add > chunk_size and current_chunk_words:
-                chunks.append(" ".join(current_chunk_words))
-                if approx_overlap_word_count > 0 and len(current_chunk_words) > approx_overlap_word_count:
-                    current_chunk_words = current_chunk_words[-approx_overlap_word_count:]
-                else:
+                chunks_list.append(" ".join(current_chunk_words)) # Adiciona chunk formado
+                
+                # Prepara o overlap para o próximo chunk
+                if approx_overlap_word_count > 0:
+                    # Pega as últimas N palavras do chunk recém-formado para o overlap
+                    # Se o chunk for menor que o overlap desejado, pega todas as suas palavras
+                    overlap_start_index = max(0, len(current_chunk_words) - approx_overlap_word_count)
+                    current_chunk_words = current_chunk_words[overlap_start_index:]
+                else: # Sem overlap
                     current_chunk_words = []
-                current_length = len(" ".join(current_chunk_words))
+                
+                current_length = len(" ".join(current_chunk_words)) if current_chunk_words else 0
+                # A palavra atual (words[idx]) NÃO foi adicionada ainda ao novo current_chunk_words (que é o overlap).
+                # O loop continuará, e words[idx] será avaliada para adição no próximo ciclo.
+                # Não incrementamos idx aqui para reavaliar a palavra atual com o novo (overlapping) chunk.
+                # Isso significa que a palavra que "quebrou" o limite será a primeira a ser considerada para o novo chunk.
+            
+            # Adiciona a palavra atual ao chunk em formação
             current_chunk_words.append(word)
             current_length += word_len_to_add
+            idx += 1
+        
+        # Adiciona o último chunk restante
         if current_chunk_words:
-            chunks.append(" ".join(current_chunk_words))
-        return [chunk for chunk in chunks if chunk.strip()]
+            chunks_list.append(" ".join(current_chunk_words))
+            
+        return [chunk for chunk in chunks_list if chunk.strip()]
 
-    def _process_documents(self):
-        pdf_files_in_folder = [f for f in os.listdir(self.data_folder) if f.endswith(".pdf")]
+
+    def _load_or_process_documents(self):
+        processed_status = self._load_processed_files_status()
+        new_or_updated_processed_status = processed_status.copy()
+        anything_processed_this_run = False
+        files_in_db_this_session = set()
+
+        pdf_files_in_folder = [f for f in os.listdir(self.data_folder) if f.lower().endswith(".pdf")]
+
         if not pdf_files_in_folder:
-            logging.warning(f"Nenhum arquivo PDF encontrado em '{self.data_folder}'.")
-            self.processed_pdf_files = []
-            return
-
-        all_texts = []
-        successfully_processed_files_temp = []
+            logger.info(f"Nenhum arquivo PDF encontrado em '{self.data_folder}'. Verificando conteúdo existente no ChromaDB.")
+        
         for pdf_file in pdf_files_in_folder:
             pdf_path = os.path.join(self.data_folder, pdf_file)
-            logging.info(f"Processando arquivo: {pdf_path}")
-            text = self._extract_text_from_pdf(pdf_path)
-            if text.strip():
-                all_texts.append(text)
-                successfully_processed_files_temp.append(pdf_file)
+            try:
+                file_mtime = os.path.getmtime(pdf_path)
+                file_size = os.path.getsize(pdf_path)
+            except FileNotFoundError:
+                logger.warning(f"Arquivo '{pdf_file}' não encontrado em '{pdf_path}' durante o processamento. Pulando.")
+                continue
+
+            needs_processing = True
+            if pdf_file in processed_status:
+                status_entry = processed_status[pdf_file]
+                if status_entry.get('mtime') == file_mtime and status_entry.get('size') == file_size:
+                    needs_processing = False
+                    files_in_db_this_session.add(pdf_file) 
+                else:
+                    logger.info(f"Arquivo '{pdf_file}' modificado. Reprocessando...")
+                    self.collection.delete(where={"source": pdf_file})
+                    logger.info(f"Chunks antigos de '{pdf_file}' removidos do ChromaDB.")
             else:
-                logging.warning(f"Nenhum texto útil extraído de '{pdf_file}'.")
-        self.processed_pdf_files = successfully_processed_files_temp
+                logger.info(f"Novo arquivo: '{pdf_file}'. Processando...")
 
-        if not all_texts:
-            logging.warning("Nenhum texto pôde ser extraído dos PDFs para processamento.")
-            return
+            if needs_processing:
+                anything_processed_this_run = True
+                logger.info(f"Processando e indexando: {pdf_path}")
+                text = self._extract_text_from_pdf(pdf_path)
 
-        self.text_chunks_corpus = []
-        for text_content in all_texts:
-            chunks = self._chunk_text(text_content)
-            self.text_chunks_corpus.extend(chunks)
+                if not text.strip():
+                    logger.warning(f"Nenhum texto útil extraído de '{pdf_file}'.")
+                    if pdf_file in new_or_updated_processed_status:
+                        del new_or_updated_processed_status[pdf_file]
+                    continue
 
-        if not self.text_chunks_corpus:
-            logging.warning("Nenhum chunk de texto gerado.")
-            return
-        logging.info(f"Total de {len(self.text_chunks_corpus)} chunks de texto gerados a partir de {len(self.processed_pdf_files)} arquivos PDF.")
+                chunks = self._chunk_text(text)
+                if not chunks:
+                    logger.warning(f"Nenhum chunk gerado para '{pdf_file}'. Verifique o conteúdo e o chunk_size.")
+                    if pdf_file in new_or_updated_processed_status:
+                        del new_or_updated_processed_status[pdf_file]
+                    continue
 
-        try:
-            logging.info("Gerando embeddings...")
-            embeddings = self.embedding_model.encode(self.text_chunks_corpus, show_progress_bar=True)
-            logging.info("Embeddings gerados.")
-            if embeddings is None or len(embeddings) == 0:
-                logging.error("Nenhum embedding foi gerado.")
-                return
-            dimension = embeddings.shape[1]
-            self.index = faiss.IndexFlatL2(dimension)
-            self.index.add(np.array(embeddings, dtype=np.float32))
-            logging.info(f"Índice FAISS criado com {self.index.ntotal} vetores.")
-        except Exception as e:
-            logging.error(f"Erro durante embeddings ou criação do índice FAISS: {e}")
-            raise
+                logger.info(f"Gerando embeddings para {len(chunks)} chunks de '{pdf_file}'.")
+                try:
+                    embeddings = self.embedding_model_st.encode(chunks, show_progress_bar=False)
+                    chunk_ids = [f"{pdf_file}_chunk_{i}" for i in range(len(chunks))]
+                    metadatas = [{"source": pdf_file, "chunk_index": i, "original_text_preview": chunk[:100]+"..."} for i, chunk in enumerate(chunks)] # Adiciona preview
+
+                    self.collection.add(
+                        ids=chunk_ids,
+                        embeddings=embeddings.tolist(),
+                        documents=chunks,
+                        metadatas=metadatas
+                    )
+                    logger.info(f"{len(chunks)} chunks de '{pdf_file}' adicionados/atualizados no ChromaDB.")
+                    new_or_updated_processed_status[pdf_file] = {
+                        'mtime': file_mtime, 'size': file_size, 'chunk_count': len(chunks)
+                    }
+                    files_in_db_this_session.add(pdf_file)
+                except Exception as e:
+                    logger.error(f"Erro ao processar/adicionar chunks de '{pdf_file}' ao ChromaDB: {e}", exc_info=True)
+            else:
+                logger.debug(f"Arquivo '{pdf_file}' já estava processado e atualizado no BD (conforme status).")
+                files_in_db_this_session.add(pdf_file)
+
+        stale_files_in_status = [fname for fname in new_or_updated_processed_status if fname not in pdf_files_in_folder]
+        for fname in stale_files_in_status:
+            logger.info(f"Removendo '{fname}' do status e do ChromaDB (arquivo não encontrado na pasta de dados).")
+            self.collection.delete(where={"source": fname})
+            del new_or_updated_processed_status[fname] # Corrigido de pdf_file para fname
+            anything_processed_this_run = True 
+
+        if anything_processed_this_run:
+            self._save_processed_files_status(new_or_updated_processed_status)
+        
+        self.processed_pdf_files = sorted(list(files_in_db_this_session))
+
+        db_count = self.collection.count()
+        if db_count > 0:
+            logger.info(f"Carregamento concluído. Total de {db_count} chunks no ChromaDB de {len(self.processed_pdf_files)} fontes PDF ativas.")
+        elif pdf_files_in_folder: # Se há arquivos mas DB está vazio após tudo
+            logger.warning("Nenhum chunk no ChromaDB após o processamento, apesar de existirem PDFs. Verifique logs de extração/chunking.")
+        else: # Sem PDFs na pasta e DB vazio
+            logger.info("Nenhum PDF na pasta de dados e nenhum chunk no ChromaDB.")
+
 
     def retrieve_relevant_chunks(self, query: str, k: int = config.DEFAULT_RETRIEVAL_K) -> List[str]:
-        if self.index is None or self.embedding_model is None or not self.text_chunks_corpus:
+        if self.collection.count() == 0:
+            logger.warning("ChromaDB está vazio. Não é possível realizar busca.")
             return []
         try:
-            query_embedding = self.embedding_model.encode([query])
-            distances, indices = self.index.search(np.array(query_embedding, dtype=np.float32), k)
-            relevant_chunks = [self.text_chunks_corpus[i] for i in indices[0] if i < len(self.text_chunks_corpus)]
-            logging.info(f"Encontrados {len(relevant_chunks)} chunks relevantes.")
-            return relevant_chunks
+            query_embedding = self.embedding_model_st.encode([query]).tolist()
+            results = self.collection.query(
+                query_embeddings=query_embedding,
+                n_results=min(k, self.collection.count()), 
+                include=["documents"] 
+            )
+            retrieved_documents = results.get('documents', [[]])[0]
+            logger.info(f"Recuperados {len(retrieved_documents)} chunks via ChromaDB.")
+            return retrieved_documents
         except Exception as e:
-            logging.error(f"Erro ao buscar chunks relevantes: {e}")
+            logger.error(f"Erro ao buscar chunks no ChromaDB: {e}", exc_info=True)
             return []
-
-    def query_llm(self, query: str, context_chunks: List[str]) -> str:
-        if not context_chunks:
-            prompt = f"Usuário: {query}\n\nAssistente: Não encontrei informações relevantes nos documentos para responder."
-        else:
-            context_str = "\n\n---\n\n".join(context_chunks)
-            prompt = (
-                f"Com base nos seguintes trechos de documentos, responda à pergunta do usuário de forma concisa e informativa.\n"
-                f"Se a informação não estiver nos trechos, indique que não foi encontrada nos documentos fornecidos.\n"
-                f"Priorize informações diretamente contidas nos trechos fornecidos.\n\n"
-                f"Contexto dos Documentos:\n{context_str}\n\n"
-                f"Pergunta do Usuário: {query}\n\n"
-                f"Assistente:"
-            )
-        logging.info(f"Enviando prompt para Ollama (modelo: {self.configured_ollama_model})...")
-        try:
-            response = ollama.chat(
-                model=self.configured_ollama_model,
-                messages=[{'role': 'user', 'content': prompt}]
-            )
-            if 'message' in response and 'content' in response['message']:
-                return response['message']['content'].strip()
-            else:
-                logging.error(f"Resposta inesperada do Ollama: {response}")
-                return "Erro ao processar a resposta do LLM."
-        except Exception as e:
-            logging.error(f"Erro ao comunicar com o Ollama: {e}")
-            return f"Erro ao comunicar com o LLM: {e}"
 
     def answer_query(self, query: str) -> str:
-        logging.info(f"Recebida nova consulta: '{query}'")
+        logger.info(f"Consulta recebida: '{query}'")
         relevant_chunks = self.retrieve_relevant_chunks(query)
 
         if config.PRINT_DEBUG_CHUNKS:
-            print("\n--- CHUNKS RECUPERADOS (DEBUG) ---")
+            print("\n--- CHUNKS RECUPERADOS (DEBUG VIA CHROMA DB) ---")
             if relevant_chunks:
                 for i, chunk_text in enumerate(relevant_chunks):
                    print(f"CHUNK {i+1}:\n{chunk_text}\n--------------------")
@@ -185,29 +255,55 @@ class RAGCore:
                 print("Nenhum chunk relevante encontrado para a consulta.")
             print("--- FIM DOS CHUNKS (DEBUG) ---\n")
         
-        if not self.text_chunks_corpus and not relevant_chunks:
-             return "Nenhum documento foi carregado ou processado, ou nenhum chunk relevante foi encontrado."
+        if self.collection.count() == 0 and not relevant_chunks:
+             return "Nenhum documento no banco de dados ou nenhum chunk relevante encontrado."
         
-        response = self.query_llm(query, relevant_chunks)
-        logging.info(f"Resposta gerada para '{query}': '{response}'")
-        return response
+        return self.query_llm(query, relevant_chunks)
+
+    def query_llm(self, query: str, context_chunks: List[str]) -> str:
+        if not context_chunks:
+            prompt_message = (f"Pergunta do Usuário: {query}\n\nAssistente: "
+                              "Não encontrei informações específicas nos documentos para responder a esta pergunta.")
+        else:
+            context_str = "\n\n---\n\n".join(context_chunks)
+            prompt_message = (
+                f"Com base nos seguintes trechos de documentos, responda à pergunta do usuário de forma concisa e informativa.\n"
+                f"Se a informação não estiver nos trechos, indique que não foi encontrada nos documentos fornecidos.\n"
+                f"Priorize informações diretamente contidas nos trechos fornecidos.\n\n"
+                f"Contexto dos Documentos:\n{context_str}\n\n"
+                f"Pergunta do Usuário: {query}\n\n"
+                f"Assistente:"
+            )
+        logger.info(f"Enviando prompt para Ollama (modelo: {self.configured_ollama_model})...")
+        try:
+            response = ollama.chat(
+                model=self.configured_ollama_model,
+                messages=[{'role': 'user', 'content': prompt_message}]
+            )
+            if response and 'message' in response and 'content' in response['message']:
+                return response['message']['content'].strip()
+            else:
+                logger.error(f"Resposta inesperada do Ollama: {response}")
+                return "Erro: LLM retornou resposta em formato inesperado."
+        except Exception as e:
+            logger.error(f"Erro ao comunicar com Ollama: {e}", exc_info=True)
+            return f"Erro ao comunicar com o LLM: {e}"
+
 
 if __name__ == '__main__':
-    print(f"Usando embedding_model='{config.DEFAULT_EMBEDDING_MODEL}', ollama_model='{config.DEFAULT_OLLAMA_MODEL}'")
-    if config.PRINT_DEBUG_CHUNKS:
-        print("Depuração de chunks ATIVADA.")
-    else:
-        print("Depuração de chunks DESATIVADA.")
+    logger.info(f"Modo de teste RAGCore. Embedding: '{config.DEFAULT_EMBEDDING_MODEL}', Ollama: '{config.DEFAULT_OLLAMA_MODEL}'")
+    if config.PRINT_DEBUG_CHUNKS: logger.info("Depuração de chunks ATIVADA.")
+    else: logger.info("Depuração de chunks DESATIVADA.")
+
     try:
-        rag_system = RAGCore()
-        if rag_system.index or rag_system.text_chunks_corpus:
-            print("-" * 50)
-            test_query_1 = "Qual o tema principal discutido?" 
-            answer_1 = rag_system.answer_query(test_query_1)
-            print(f"\nConsulta: {test_query_1}\nResposta: {answer_1}\n{'-'*50}")
+        rag_system = RAGCore() 
+        if rag_system.collection.count() > 0:
+            test_queries = ["Qual o tema principal?", "Existem prazos?", "Informações sobre bolsas?"]
+            for tq in test_queries:
+                answer = rag_system.answer_query(tq)
+                print(f"\nConsulta: {tq}\nResposta: {answer}\n{'-'*30}")
         else:
-            print("Sistema RAG não pôde ser inicializado ou não processou documentos.")
+            print(f"Sistema RAG inicializado, mas sem documentos no ChromaDB. Verifique '{config.DEFAULT_DATA_FOLDER}'.")
     except Exception as e:
-        print(f"Ocorreu um erro crítico ao executar o RAGCore: {e}")
-        logging.error("Erro crítico no __main__ do RAGCore", exc_info=True)
-        
+        print(f"Erro crítico no teste do RAGCore: {e}")
+        logger.error("Erro crítico no __main__ do RAGCore", exc_info=True)

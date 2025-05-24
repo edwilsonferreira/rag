@@ -21,3 +21,10 @@ DEFAULT_CHUNK_OVERLAP: int = 200 # 100
 
 # Parâmetro k padrão para recuperação de chunks
 DEFAULT_RETRIEVAL_K: int = 10 #5
+
+# Caminho para o banco de dados ChromaDB persistente
+CHROMA_DB_PATH: str = "./chroma_db_store"
+CHROMA_COLLECTION_NAME: str = "rag_documents"
+
+# Arquivo para rastrear o estado dos arquivos PDF processados
+PROCESSED_FILES_STATUS_JSON: str = "processed_files_status.json"

@@ -84,6 +84,10 @@ ipython_config.py
 # Data folder with pdfs file
 data/*
 
+# Database
+processed_files_status.json
+chroma_db_store
+
 # Geral
 .DS_Store
 historico_promts.md

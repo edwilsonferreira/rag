@@ -4,10 +4,12 @@ from rag_core import RAGCore
 import logging
 import readline # Para melhor experiência de input
 from datetime import datetime # Para timestamps
-import config as config # Para acessar o flag SHOW_CHAT_TIMESTAMPS
+import config # Para acessar flags e defaults
 
-# Configuração de logging (opcional, pode ser controlado pelo rag_core)
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# Configuração de logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
 
 class RAGTerminal:
     """
@@ -22,8 +24,11 @@ class RAGTerminal:
             rag_core_instance (RAGCore): Uma instância já inicializada de RAGCore.
         """
         self.rag_core = rag_core_instance
-        if not self.rag_core.text_chunks_corpus and (not hasattr(self.rag_core, 'processed_pdf_files') or not self.rag_core.processed_pdf_files):
-             print("⚠️  Atenção: Nenhum documento foi carregado ou processado no RAGCore.")
+        # Atualiza a verificação para usar o ChromaDB e a lista de arquivos processados
+        if self.rag_core.collection.count() == 0 and \
+           (not hasattr(self.rag_core, 'processed_pdf_files') or not self.rag_core.processed_pdf_files):
+             print("⚠️  Atenção: Nenhum documento parece ter sido carregado ou processado no RAGCore.")
+             print("⚠️  (A coleção ChromaDB está vazia e nenhum PDF processado foi listado).")
              print("⚠️  As respostas podem não ser baseadas em seus documentos.")
              print(f"⚠️  Certifique-se de que há arquivos PDF na pasta '{config.DEFAULT_DATA_FOLDER}' e que foram processados.")
 
@@ -47,10 +52,8 @@ class RAGTerminal:
                 if config.SHOW_CHAT_TIMESTAMPS:
                     current_time_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     timestamp_prefix = f"[{current_time_str}] "
-
-                # Monta o prompt para o input
-                full_prompt = f"{timestamp_prefix}{prompt_text.lstrip()}" # lstrip para remover o \n se o prefixo já estiver lá
                 
+                full_prompt = f"{timestamp_prefix}{prompt_text.lstrip()}"
                 query = input(full_prompt)
 
                 if query.strip().lower() == 'sair':
@@ -62,7 +65,6 @@ class RAGTerminal:
                 print("\nBuscando e processando sua resposta...")
                 answer = self.rag_core.answer_query(query)
 
-                # Prepara a exibição da resposta com timestamp (se ativado)
                 response_prefix = "\nResposta do Sistema:\n"
                 if config.SHOW_CHAT_TIMESTAMPS:
                     response_time_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -75,26 +77,26 @@ class RAGTerminal:
                 print("\nSessão interrompida pelo usuário. Saindo...")
                 break
             except Exception as e:
-                logging.error(f"Ocorreu um erro na sessão interativa: {e}")
+                logging.error(f"Ocorreu um erro na sessão interativa: {e}", exc_info=True)
                 print("Ocorreu um erro. Tente novamente ou digite 'sair'.")
 
 if __name__ == '__main__':
-    print("Inicializando o sistema RAG Core para o terminal...")
-    print("Isso pode levar alguns minutos dependendo do número e tamanho dos PDFs...")
+    logger.info("Inicializando o sistema RAG Core para o terminal...")
+    logger.info("Isso pode levar alguns minutos na primeira execução ou ao processar novos PDFs...")
 
     try:
-        # RAGCore usará os defaults de config.py para os modelos
         core_system = RAGCore()
 
-        if core_system.index or core_system.text_chunks_corpus or \
-           (hasattr(core_system, 'processed_pdf_files') and core_system.processed_pdf_files):
+        # Condição ATUALIZADA para verificar se o RAGCore está pronto usando ChromaDB
+        if core_system.collection and core_system.collection.count() > 0:
+            logger.info(f"{core_system.collection.count()} chunks encontrados no ChromaDB. Iniciando terminal.")
             terminal = RAGTerminal(core_system)
             terminal.start_interactive_session()
         else:
-            print(f"\n❌ Falha ao inicializar o RAGCore ou nenhum documento processado. Verifique os logs e a pasta '{config.DEFAULT_DATA_FOLDER}'.")
-            print("   O terminal interativo não será iniciado se não houver dados para consulta.")
+            logger.error(f"\n❌ Nenhum dado encontrado no ChromaDB ou nenhum PDF processado com sucesso. Verifique os logs e a pasta '{config.DEFAULT_DATA_FOLDER}'.")
+            logger.error("   O terminal interativo não será iniciado se não houver dados para consulta.")
 
     except Exception as e:
-        print(f"\n❌ Erro crítico durante a inicialização do RAGCore: {e}")
-        print("   Verifique se o Ollama está rodando e se os modelos estão acessíveis.")
-        print("   O terminal interativo não será iniciado.")
+        logger.error(f"\n❌ Erro crítico durante a inicialização do RAGCore: {e}", exc_info=True)
+        logger.error("   Verifique se o Ollama está rodando e se os modelos estão acessíveis.")
+        logger.error("   O terminal interativo não será iniciado.")
