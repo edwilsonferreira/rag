@@ -1,14 +1,16 @@
-# rag_terminal.py
+# src/rag_app/rag_terminal.py
 
-from rag_core import RAGCore
 import logging
 import readline # Para melhor experiência de input
 from datetime import datetime # Para timestamps
-import config # Para acessar flags e defaults
 
-# Configuração de logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+# Importações corrigidas para usar referências relativas dentro do pacote 'rag_app'
+from .rag_core import RAGCore
+from . import config
+
 logger = logging.getLogger(__name__)
+if not logger.handlers: # Evita adicionar handlers múltiplos
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 
 class RAGTerminal:
@@ -19,18 +21,18 @@ class RAGTerminal:
     def __init__(self, rag_core_instance: RAGCore):
         """
         Inicializa o RAGTerminal.
-
-        Args:
-            rag_core_instance (RAGCore): Uma instância já inicializada de RAGCore.
         """
         self.rag_core = rag_core_instance
-        # Atualiza a verificação para usar o ChromaDB e a lista de arquivos processados
-        if self.rag_core.collection.count() == 0 and \
+        db_count = 0
+        if hasattr(self.rag_core, 'collection') and self.rag_core.collection:
+            db_count = self.rag_core.collection.count()
+
+        # Verifica se há dados para consultar
+        if db_count == 0 and \
            (not hasattr(self.rag_core, 'processed_pdf_files') or not self.rag_core.processed_pdf_files):
              print("⚠️  Atenção: Nenhum documento parece ter sido carregado ou processado no RAGCore.")
              print("⚠️  (A coleção ChromaDB está vazia e nenhum PDF processado foi listado).")
-             print("⚠️  As respostas podem não ser baseadas em seus documentos.")
-             print(f"⚠️  Certifique-se de que há arquivos PDF na pasta '{config.DEFAULT_DATA_FOLDER}' e que foram processados.")
+             print(f"⚠️  Certifique-se de que há arquivos PDF na pasta '{config.DEFAULT_DATA_FOLDER}' (relativa à raiz do projeto) e que foram processados.")
 
 
     def start_interactive_session(self):
@@ -77,17 +79,17 @@ class RAGTerminal:
                 print("\nSessão interrompida pelo usuário. Saindo...")
                 break
             except Exception as e:
-                logging.error(f"Ocorreu um erro na sessão interativa: {e}", exc_info=True)
+                logger.error(f"Ocorreu um erro na sessão interativa: {e}", exc_info=True)
                 print("Ocorreu um erro. Tente novamente ou digite 'sair'.")
 
 if __name__ == '__main__':
     logger.info("Inicializando o sistema RAG Core para o terminal...")
-    logger.info("Isso pode levar alguns minutos na primeira execução ou ao processar novos PDFs...")
+    logger.info("Execute este script a partir da raiz do projeto: python -m src.rag_app.rag_terminal")
 
     try:
+        # RAGCore usará os defaults de config.py para os modelos
         core_system = RAGCore()
 
-        # Condição ATUALIZADA para verificar se o RAGCore está pronto usando ChromaDB
         if core_system.collection and core_system.collection.count() > 0:
             logger.info(f"{core_system.collection.count()} chunks encontrados no ChromaDB. Iniciando terminal.")
             terminal = RAGTerminal(core_system)

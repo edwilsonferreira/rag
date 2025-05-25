@@ -1,15 +1,35 @@
-# rag_web.py
+# src/rag_app/rag_web.py
 
-import streamlit as st
-from rag_core import RAGCore
-import logging
+import sys
 import os
-import config # Importa as configurações globais
-from datetime import datetime # Para timestamps
+
+# --- Início da Modificação para Resolver ImportError/ModuleNotFoundError com Streamlit ---
+# Adiciona o diretório 'src' (pai de 'rag_app') ao sys.path.
+# Isso permite que 'rag_app' seja encontrado como um pacote de nível superior
+# quando este script (rag_web.py) é executado diretamente pelo Streamlit.
+
+_current_file_path = os.path.abspath(__file__) # Caminho para src/rag_app/rag_web.py
+_rag_app_dir = os.path.dirname(_current_file_path) # Caminho para src/rag_app/
+_src_dir = os.path.dirname(_rag_app_dir) # Caminho para src/
+
+# Adiciona 'src' ao início do sys.path se ainda não estiver lá
+if _src_dir not in sys.path:
+    sys.path.insert(0, _src_dir)
+# --- Fim da Modificação ---
+
+# Agora, com 'src' no sys.path, podemos usar importações absolutas a partir de 'rag_app'
+from rag_app.rag_core import RAGCore
+from rag_app import config
+
+import streamlit as st # Streamlit é uma dependência externa, importação normal
+import logging         # Biblioteca padrão
+from datetime import datetime # Biblioteca padrão
+# 'os' já foi importado acima
 
 # Configuração de logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+if not logger.handlers: # Evita adicionar handlers múltiplos se o módulo for importado/recarregado
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 # Título da página do navegador e layout
 st.set_page_config(page_title="Pesquisa Inteligente com RAG & Ollama", layout="wide")
@@ -19,10 +39,12 @@ def load_rag_core_cached():
     """
     Carrega e inicializa a instância do RAGCore.
     Esta função será cacheada pelo Streamlit.
+    Os caminhos em config.py são relativos ao CWD (geralmente a raiz do projeto).
     """
-    data_folder_path = config.DEFAULT_DATA_FOLDER
+    data_folder_path = config.DEFAULT_DATA_FOLDER 
     if not os.path.exists(data_folder_path) or not os.listdir(data_folder_path):
-        st.error(f"A pasta '{data_folder_path}' (definida em config.py como DEFAULT_DATA_FOLDER) "
+        st.error(f"A pasta de dados '{data_folder_path}' (definida em config.py como DEFAULT_DATA_FOLDER e "
+                 f"esperada na raiz do projeto se você executou o comando Streamlit da raiz) "
                  "está vazia ou não existe. Por favor, crie-a e adicione seus arquivos PDF.")
         return None 
 
@@ -30,22 +52,18 @@ def load_rag_core_cached():
         # RAGCore usará os defaults de config.py para os modelos se não especificados aqui
         core = RAGCore(data_folder=data_folder_path) 
         
-        # Verifica o estado após a inicialização do RAGCore
         processed_files_exist = hasattr(core, 'processed_pdf_files') and core.processed_pdf_files
-        # Verifica se a coleção foi criada e se tem itens
         chunks_in_db = hasattr(core, 'collection') and core.collection and core.collection.count() > 0
 
         if not chunks_in_db and not processed_files_exist:
             st.warning("Nenhum documento PDF foi encontrado na pasta de dados ou processado com sucesso para o ChromaDB.")
         elif processed_files_exist and not chunks_in_db:
-             # Esta é a condição que gerou o aviso para você anteriormente.
-             # Significa que RAGCore identificou PDFs, mas nada foi parar no ChromaDB.
              st.warning(f"Documentos PDF foram identificados ({len(core.processed_pdf_files)}), mas nenhum chunk de texto foi efetivamente indexado no ChromaDB. "
                         "Verifique o conteúdo dos seus PDFs (precisam de texto extraível) e os logs detalhados do RAGCore no terminal para erros de processamento ou chunking.")
         elif not processed_files_exist and chunks_in_db:
-            # Caso estranho: chunks no DB mas nenhum arquivo PDF listado como processado. Pode indicar inconsistência no estado.
             st.warning("Foram encontrados chunks no banco de dados, mas a lista de arquivos PDF processados está vazia. "
-                       "Considere forçar um reprocessamento (deletando 'processed_files_status.json' e a pasta 'chroma_db_store').")
+                       "Isso pode indicar uma inconsistência. Considere forçar um reprocessamento (deletando "
+                       f"'{config.PROCESSED_FILES_STATUS_JSON}' e a pasta '{config.CHROMA_DB_PATH}').")
         
         return core
     except Exception as e:
@@ -62,7 +80,7 @@ st.title("📚 Pesquisa Inteligente em Documentos com RAG e Ollama")
 
 if not rag_system:
     st.error("O Sistema RAG não pôde ser inicializado. Verifique as mensagens acima e os logs no terminal.")
-    st.markdown(f"Por favor, certifique-se de que a pasta `{config.DEFAULT_DATA_FOLDER}` contém arquivos PDF válidos, que o servidor Ollama está acessível, e que não houve erros durante o processamento dos documentos.")
+    st.markdown(f"Por favor, certifique-se de que a pasta `{config.DEFAULT_DATA_FOLDER}` (relativa à raiz do projeto) contém arquivos PDF válidos, que o servidor Ollama está acessível, e que não houve erros durante o processamento dos documentos.")
 else:
     st.markdown("""
     Bem-vindo ao sistema de pesquisa inteligente! Este sistema utiliza a técnica RAG (Retrieval Augmented Generation)
@@ -75,67 +93,58 @@ else:
     3. Pressione Enter para obter a resposta.
     """)
 
-    # Inicializa o estado da sessão para o histórico do chat, se não existir
     if 'messages' not in st.session_state:
         st.session_state.messages = []
 
-    # Exibe o histórico do chat
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             display_content = ""
             if config.SHOW_CHAT_TIMESTAMPS and "timestamp" in message:
-                display_content += f"*{message['timestamp']}*\n\n" # Timestamp em itálico, seguido de nova linha
+                display_content += f"*{message['timestamp']}*\n\n" 
             display_content += message["content"]
             st.markdown(display_content)
 
-    # Campo de entrada para a pergunta do usuário
     user_query = st.chat_input("Digite sua pergunta aqui...")
 
     if user_query:
         current_time_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         st.session_state.messages.append({
-            "role": "user",
-            "content": user_query,
-            "timestamp": current_time_str 
+            "role": "user", "content": user_query, "timestamp": current_time_str 
         })
-        # Exibe a mensagem do usuário imediatamente
-        with st.chat_message("user"):
+        with st.chat_message("user"): # Exibe imediatamente a pergunta do usuário
             display_content_user = ""
             if config.SHOW_CHAT_TIMESTAMPS:
                 display_content_user += f"*{current_time_str}*\n\n"
             display_content_user += user_query
             st.markdown(display_content_user)
 
-        # Processa a resposta
         with st.spinner("Buscando informações e gerando resposta... Por favor, aguarde."):
             try:
                 answer = rag_system.answer_query(user_query)
                 assistant_time_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 st.session_state.messages.append({
-                    "role": "assistant",
-                    "content": answer,
-                    "timestamp": assistant_time_str
+                    "role": "assistant", "content": answer, "timestamp": assistant_time_str
                 })
-                st.rerun() # Força o recarregamento para exibir a nova mensagem do assistente a partir do loop de histórico
+                st.rerun() # Força o recarregamento para exibir a nova mensagem do assistente
             except Exception as e:
                 error_message = f"Ocorreu um erro ao processar sua pergunta: {e}"
                 st.error(error_message)
                 logger.error(f"Erro ao processar consulta '{user_query}': {e}", exc_info=True)
                 st.session_state.messages.append({
-                    "role": "assistant",
-                    "content": f"Desculpe, ocorreu um erro ao processar sua solicitação: {e}",
+                    "role": "assistant", 
+                    "content": f"Desculpe, ocorreu um erro ao processar sua solicitação.", # Mensagem mais genérica para o usuário
                     "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 })
                 st.rerun()
 
 # --- Barra Lateral (Sidebar) ---
-st.sidebar.header("ℹ️ Sobre o Sistema") # Adicionado ícone
+st.sidebar.header("ℹ️ Sobre o Sistema")
 st.sidebar.info(
     "Este é um sistema de exemplo demonstrando RAG (Retrieval Augmented Generation) "
-    "com processamento local de PDFs e um LLM via Ollama."
+    "com processamento local de PDFs e um LLM via Ollama, com persistência de dados via ChromaDB."
 )
 
-if rag_system: # Exibe informações do sistema apenas se o RAGCore foi carregado
+if rag_system: 
     if hasattr(rag_system, 'configured_ollama_model') and rag_system.configured_ollama_model:
         st.sidebar.markdown(f"**Modelo LLM (Ollama):** `{rag_system.configured_ollama_model}`")
     else: 
@@ -146,7 +155,7 @@ if rag_system: # Exibe informações do sistema apenas se o RAGCore foi carregad
         embedding_model_name_display = rag_system.configured_embedding_model_name
     st.sidebar.markdown(f"**Modelo de Embedding:** `{embedding_model_name_display}`")
 
-    st.sidebar.markdown("---") # Separador
+    st.sidebar.markdown("---") 
     st.sidebar.markdown("**📄 Arquivos PDF Processados:**")
     if hasattr(rag_system, 'processed_pdf_files'):
         if rag_system.processed_pdf_files:
@@ -154,17 +163,20 @@ if rag_system: # Exibe informações do sistema apenas se o RAGCore foi carregad
                 st.sidebar.markdown(f"  - `{pdf_name}`")
         else:
             st.sidebar.markdown("  `Nenhum PDF processado ou encontrado.`")
-    else: # Caso o atributo não exista em RAGCore (pouco provável com a classe atual)
+    else: 
         st.sidebar.markdown("  `(Informação de arquivos não disponível)`")
 
     st.sidebar.markdown("**🧩 Chunks Indexados (ChromaDB):**")
     if hasattr(rag_system, 'collection') and rag_system.collection:
-        db_count = rag_system.collection.count()
-        st.sidebar.markdown(f"  `{db_count}`")
-    else: # Caso não haja coleção ou RAGCore não carregou
-        st.sidebar.markdown("  `0`")
-
-else: # Se rag_system não foi carregado (erro na inicialização)
+        try:
+            db_count = rag_system.collection.count()
+            st.sidebar.markdown(f"  `{db_count}`")
+        except Exception as e_chroma_count: # Captura erro se a coleção não estiver acessível
+            logger.error(f"Erro ao obter contagem da coleção ChromaDB: {e_chroma_count}")
+            st.sidebar.markdown("  `Erro ao contar`")
+    else: 
+        st.sidebar.markdown("  `0 (Coleção não disponível)`")
+else: 
     st.sidebar.markdown("---")
     st.sidebar.warning("Sistema RAG não inicializado.")
     st.sidebar.markdown(f"**Modelo LLM (Padrão Config):** `{config.DEFAULT_OLLAMA_MODEL}`")
@@ -172,7 +184,6 @@ else: # Se rag_system não foi carregado (erro na inicialização)
     st.sidebar.markdown("**Arquivos PDF Processados:** `(Sistema não inicializado)`")
     st.sidebar.markdown("**Chunks Indexados (ChromaDB):** `(Sistema não inicializado)`")
 
-# Botão para limpar o histórico do chat
 if st.sidebar.button("🗑️ Limpar Histórico do Chat"):
     st.session_state.messages = []
     st.rerun()

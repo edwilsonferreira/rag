@@ -1,4 +1,4 @@
-# rag_core.py
+# src/rag_app/rag_core.py
 
 import os
 import fitz  # PyMuPDF
@@ -7,14 +7,19 @@ import numpy as np
 import ollama
 import logging
 from typing import List, Dict, Any
-import json 
-import time 
+import json
+import time
 
-import config
+# Importa as configurações usando importação relativa
+from . import config # Correto para estrutura de pacote
+
 import chromadb
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+# Configura o logging uma vez, idealmente no ponto de entrada da aplicação,
+# mas para execução direta do módulo, podemos fazer aqui com uma verificação.
+if not logger.handlers:
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 class RAGCore:
     def __init__(self,
@@ -45,8 +50,23 @@ class RAGCore:
             logger.error(f"Erro ao inicializar ChromaDB: {e}", exc_info=True)
             raise
 
-        self._ensure_data_folder()
+        # Chamada para o método que estava faltando/causando erro
+        self._ensure_data_folder() # << ESTA LINHA CHAMA O MÉTODO ABAIXO
         self._load_or_process_documents()
+
+    # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
+    # CERTIFIQUE-SE DE QUE ESTE MÉTODO ESTÁ DEFINIDO DENTRO DA CLASSE RAGCore
+    # COM A INDENTAÇÃO CORRETA
+    # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
+    def _ensure_data_folder(self):
+        """Garante que a pasta de dados (definida em config.py e passada ao __init__) exista."""
+        if not os.path.exists(self.data_folder):
+            logger.warning(f"Pasta de dados '{self.data_folder}' não encontrada. Criando...")
+            os.makedirs(self.data_folder)
+            logger.info(f"Pasta '{self.data_folder}' criada.")
+    # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    # FIM DA DEFINIÇÃO DO MÉTODO _ensure_data_folder
+    # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     def _load_processed_files_status(self) -> Dict[str, Dict[str, Any]]:
         try:
@@ -65,11 +85,6 @@ class RAGCore:
             logger.info(f"Status dos arquivos processados salvo em '{config.PROCESSED_FILES_STATUS_JSON}'.")
         except Exception as e:
             logger.error(f"Erro ao salvar o status dos arquivos processados: {e}", exc_info=True)
-
-    def _ensure_data_folder(self):
-        if not os.path.exists(self.data_folder):
-            logger.warning(f"Pasta de dados '{self.data_folder}' não encontrada. Criando...")
-            os.makedirs(self.data_folder)
 
     def _extract_text_from_pdf(self, pdf_path: str) -> str:
         try:
@@ -90,44 +105,32 @@ class RAGCore:
         current_chunk_words = []
         current_length = 0
         
-        approx_overlap_word_count = max(0, int(overlap / 6)) if overlap > 0 else 0 # Média de 6 chars/palavra+espaço
+        approx_overlap_word_count = max(0, int(overlap / 6)) if overlap > 0 else 0
 
         idx = 0
         while idx < len(words):
             word = words[idx]
-            # Calcula o tamanho que a palavra adicionaria (incluindo espaço, se não for a primeira palavra do chunk)
             word_len_to_add = len(word) + (1 if current_chunk_words else 0)
 
-            # Se a palavra estourar o chunk_size E já tivermos palavras no chunk atual
             if current_length + word_len_to_add > chunk_size and current_chunk_words:
-                chunks_list.append(" ".join(current_chunk_words)) # Adiciona chunk formado
+                chunks_list.append(" ".join(current_chunk_words))
                 
-                # Prepara o overlap para o próximo chunk
                 if approx_overlap_word_count > 0:
-                    # Pega as últimas N palavras do chunk recém-formado para o overlap
-                    # Se o chunk for menor que o overlap desejado, pega todas as suas palavras
                     overlap_start_index = max(0, len(current_chunk_words) - approx_overlap_word_count)
                     current_chunk_words = current_chunk_words[overlap_start_index:]
-                else: # Sem overlap
+                else:
                     current_chunk_words = []
                 
                 current_length = len(" ".join(current_chunk_words)) if current_chunk_words else 0
-                # A palavra atual (words[idx]) NÃO foi adicionada ainda ao novo current_chunk_words (que é o overlap).
-                # O loop continuará, e words[idx] será avaliada para adição no próximo ciclo.
-                # Não incrementamos idx aqui para reavaliar a palavra atual com o novo (overlapping) chunk.
-                # Isso significa que a palavra que "quebrou" o limite será a primeira a ser considerada para o novo chunk.
             
-            # Adiciona a palavra atual ao chunk em formação
             current_chunk_words.append(word)
             current_length += word_len_to_add
             idx += 1
         
-        # Adiciona o último chunk restante
         if current_chunk_words:
             chunks_list.append(" ".join(current_chunk_words))
             
         return [chunk for chunk in chunks_list if chunk.strip()]
-
 
     def _load_or_process_documents(self):
         processed_status = self._load_processed_files_status()
@@ -135,6 +138,7 @@ class RAGCore:
         anything_processed_this_run = False
         files_in_db_this_session = set()
 
+        # self.data_folder é definido no __init__ usando config.DEFAULT_DATA_FOLDER
         pdf_files_in_folder = [f for f in os.listdir(self.data_folder) if f.lower().endswith(".pdf")]
 
         if not pdf_files_in_folder:
@@ -184,7 +188,8 @@ class RAGCore:
                 try:
                     embeddings = self.embedding_model_st.encode(chunks, show_progress_bar=False)
                     chunk_ids = [f"{pdf_file}_chunk_{i}" for i in range(len(chunks))]
-                    metadatas = [{"source": pdf_file, "chunk_index": i, "original_text_preview": chunk[:100]+"..."} for i, chunk in enumerate(chunks)] # Adiciona preview
+                    # Adicionando mais metadados, como o preview do texto original do chunk
+                    metadatas = [{"source": pdf_file, "chunk_index": i, "text_preview": chunk[:100]+"..."} for i, chunk in enumerate(chunks)] 
 
                     self.collection.add(
                         ids=chunk_ids,
@@ -207,7 +212,7 @@ class RAGCore:
         for fname in stale_files_in_status:
             logger.info(f"Removendo '{fname}' do status e do ChromaDB (arquivo não encontrado na pasta de dados).")
             self.collection.delete(where={"source": fname})
-            del new_or_updated_processed_status[fname] # Corrigido de pdf_file para fname
+            del new_or_updated_processed_status[fname]
             anything_processed_this_run = True 
 
         if anything_processed_this_run:
@@ -218,11 +223,10 @@ class RAGCore:
         db_count = self.collection.count()
         if db_count > 0:
             logger.info(f"Carregamento concluído. Total de {db_count} chunks no ChromaDB de {len(self.processed_pdf_files)} fontes PDF ativas.")
-        elif pdf_files_in_folder: # Se há arquivos mas DB está vazio após tudo
+        elif pdf_files_in_folder:
             logger.warning("Nenhum chunk no ChromaDB após o processamento, apesar de existirem PDFs. Verifique logs de extração/chunking.")
-        else: # Sem PDFs na pasta e DB vazio
+        else:
             logger.info("Nenhum PDF na pasta de dados e nenhum chunk no ChromaDB.")
-
 
     def retrieve_relevant_chunks(self, query: str, k: int = config.DEFAULT_RETRIEVAL_K) -> List[str]:
         if self.collection.count() == 0:
@@ -298,12 +302,14 @@ if __name__ == '__main__':
     try:
         rag_system = RAGCore() 
         if rag_system.collection.count() > 0:
-            test_queries = ["Qual o tema principal?", "Existem prazos?", "Informações sobre bolsas?"]
+            test_queries = ["Qual o tema principal?", "Existem prazos?", "Informações sobre bolsas?"] # Adapte aos seus PDFs
             for tq in test_queries:
                 answer = rag_system.answer_query(tq)
                 print(f"\nConsulta: {tq}\nResposta: {answer}\n{'-'*30}")
         else:
             print(f"Sistema RAG inicializado, mas sem documentos no ChromaDB. Verifique '{config.DEFAULT_DATA_FOLDER}'.")
+            print("Para testar, adicione arquivos PDF à pasta 'data' (relativa à raiz do projeto) e reinicie.")
+
     except Exception as e:
         print(f"Erro crítico no teste do RAGCore: {e}")
         logger.error("Erro crítico no __main__ do RAGCore", exc_info=True)
