@@ -42,23 +42,23 @@ O diagrama abaixo ilustra os principais componentes do sistema RAG, suas intera�
 
 A estrutura de diretórios e arquivos esperada para o projeto é:
 
-seu_projeto_rag/
-├── src/
-│   └── rag_app/             # Pacote Python principal
-│       ├── init.py
-│       ├── config.py
-│       ├── rag_core.py
-│       ├── rag_web.py
-│       ├── rag_terminal.py
-│       └── rag_batch_query.py
-├── data/                     # PDFs de entrada (relativo à raiz do projeto)
-├── chroma_db_store/          # Banco de dados ChromaDB (relativo à raiz do projeto)
-├── assets/                   # Ativos como diagramas
-│   └── diagrama_rag_sistema.svg
-├── processed_files_status.json # Rastreia PDFs processados (relativo à raiz do projeto)
-├── requirements.txt          # Dependências Python
-└── README.md                 # Este arquivo
-
+seu_projeto_rag/  
+├── src/  
+│   └── rag_app/             # Pacote Python principal  
+│       ├── init.py  
+│       ├── config.py  
+│       ├── rag_core.py  
+│       ├── rag_web.py  
+│       ├── rag_terminal.py  
+│       └── rag_batch_query.py  
+├── data/                     # PDFs de entrada (relativo à raiz do projeto)  
+├── chroma_db_store/          # Banco de dados ChromaDB (relativo à raiz do projeto)  
+├── assets/                   # Ativos como diagramas  
+│   └── diagrama_rag_sistema.svg  
+├── processed_files_status.json # Rastreia PDFs processados (relativo à raiz do projeto)  
+├── requirements.txt          # Dependências Python  
+└── README.md                 # Este arquivo  
+  
 
 ## ⚙️ Configuração e Execução do Sistema
 
