@@ -1,24 +1,22 @@
 # src/rag_app/config.py
 
 # --- Configurações Globais e Flags de Depuração ---
-
-# Flag para controlar a impressão de chunks recuperados para depuração
-PRINT_DEBUG_CHUNKS: bool = False
-
-# Flag para controlar a exibição de data e hora nas mensagens do chat
+PRINT_DEBUG_CHUNKS: bool = True
 SHOW_CHAT_TIMESTAMPS: bool = True
+
+# --- NOVA FLAG PARA CITAÇÃO DE PÁGINA ---
+# Se True, o LLM será instruído a TENTAR SEMPRE incluir a fonte e página na resposta.
+# Se False, a instrução será mais branda ou dependerá de perguntas específicas sobre a fonte.
+ALWAYS_INCLUDE_PAGE_IN_ANSWER: bool = True # Default para False (respostas mais concisas)
 
 # Modelos padrão a serem utilizados
 DEFAULT_OLLAMA_MODEL: str = "llama3:latest"
 DEFAULT_EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
 
 # Pasta padrão para os dados (arquivos PDF)
-# Este caminho será interpretado relativo ao diretório de onde o script principal é executado
-# (geralmente a raiz do projeto).
 DEFAULT_DATA_FOLDER: str = "data"
 
 # Caminho para o banco de dados ChromaDB persistente
-# Este caminho também será relativo ao diretório de execução.
 CHROMA_DB_PATH: str = "./chroma_db_store"
 CHROMA_COLLECTION_NAME: str = "rag_documents"
 
