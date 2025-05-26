@@ -93,7 +93,49 @@ pip install -r requirements.txt
 
 ### 5. Configuração do Projeto (src/rag_app/config.py)
 
-Ajuste os parâmetros em src/rag_app/config.py conforme necessário. Os caminhos como DEFAULT_DATA_FOLDER, CHROMA_DB_PATH, PROCESSED_FILES_STATUS_JSON são relativos ao diretório de onde os scripts são executados (geralmente a raiz do projeto ao usar os comandos abaixo).
+O arquivo src/rag_app/config.py é o centro de controle para os parâmetros do sistema. Ajuste-o conforme suas necessidades. Os caminhos como DEFAULT_DATA_FOLDER, CHROMA_DB_PATH, PROCESSED_FILES_STATUS_JSON são relativos ao diretório de onde os scripts são executados (geralmente a raiz do projeto ao usar os comandos de execução recomendados).
+
+Python
+#### 5.1 src/rag_app/config.py (principais parâmetros)
+from typing import List # Necessário para EXIT_COMMANDS
+
+#### 5.2 Flags de Depuração e Comportamento
+PRINT_DEBUG_CHUNKS: bool = True       # True para imprimir chunks recuperados no console.
+SHOW_CHAT_TIMESTAMPS: bool = True     # True para exibir data/hora no chat.
+ALWAYS_INCLUDE_PAGE_IN_ANSWER: bool = False # True para instruir o LLM a SEMPRE tentar citar a fonte/página.
+
+#### 5.3 Comandos para finalizar loops interativos (ex: rag_terminal)
+EXIT_COMMANDS: List[str] = [
+    "sair", "saia", "exit", "quit", "q",
+    "parar", "pare", "stop",
+    "finalizar", "finalize", "fim", "end",
+    "fechar", "close",
+    "terminar", "terminate", "bye"
+]
+
+#### 5.4 Modelos Padrão
+DEFAULT_OLLAMA_MODEL: str = "llama3:latest"
+DEFAULT_EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
+
+#### 5.5 Caminhos e Nomes de Coleção/Status
+DEFAULT_DATA_FOLDER: str = "data"
+CHROMA_DB_PATH: str = "./chroma_db_store" 
+CHROMA_COLLECTION_NAME: str = "rag_documents"
+PROCESSED_FILES_STATUS_JSON: str = "processed_files_status.json"
+
+##### 5.6 Parâmetros de Chunking e Recuperação
+DEFAULT_CHUNK_SIZE: int = 768
+DEFAULT_CHUNK_OVERLAP: int = 100
+DEFAULT_RETRIEVAL_K: int = 5
+
+#### 5.7 Novos Parâmetros Adicionados:
+
+ALWAYS_INCLUDE_PAGE_IN_ANSWER: bool:
+Se definido como True, o sistema instruirá o Modelo de Linguagem Grande (LLM) a tentar incluir explicitamente o nome do arquivo de origem e o número da página em suas respostas sempre que fornecer informações baseadas nos documentos.
+Se False (padrão), a instrução para citação será mais branda ou dependerá de perguntas específicas do usuário sobre a fonte.
+EXIT_COMMANDS: List[str]:
+Uma lista de palavras-chave (em minúsculas) que podem ser usadas para encerrar os loops interativos, como o rag_terminal.py ou o modo de teste do rag_core.py. Isso oferece mais flexibilidade ao usuário para sair da aplicação.
+
 
 ### 6. Preparando Dados de Entrada (PDFs)
 

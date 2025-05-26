@@ -6,11 +6,14 @@ from sentence_transformers import SentenceTransformer
 import numpy as np
 import ollama
 import logging
-from typing import List, Dict, Any 
+from typing import List, Dict, Any
 import json
 import time
+# Removido: from datetime import datetime (não mais usado na classe após remover __main__)
 
-from . import config # Importação relativa para config
+# Importa as configurações usando importação relativa
+from . import config
+
 import chromadb
 
 logger = logging.getLogger(__name__)
@@ -18,12 +21,6 @@ if not logger.handlers:
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 class RAGCore:
-    # ... (__init__ e todos os outros métodos como _ensure_data_folder, 
-    #      _load_processed_files_status, _save_processed_files_status, 
-    #      _extract_text_from_pdf, _chunk_text, _load_or_process_documents, 
-    #      retrieve_relevant_chunks, answer_query
-    #      permanecem OS MESMOS da última versão completa que você tem) ...
-
     def __init__(self,
                  data_folder: str = config.DEFAULT_DATA_FOLDER,
                  model_name: str = config.DEFAULT_EMBEDDING_MODEL,
@@ -143,7 +140,6 @@ class RAGCore:
                     logger.info(f"Chunks antigos de '{pdf_file}' removidos do ChromaDB.")
             else:
                 logger.info(f"Novo arquivo: '{pdf_file}'. Processando...")
-
             if needs_reprocessing:
                 anything_processed_this_run = True
                 logger.info(f"Processando e indexando arquivo: {pdf_path}")
@@ -191,6 +187,7 @@ class RAGCore:
                     if pdf_file in new_or_updated_processed_status: del new_or_updated_processed_status[pdf_file]
             else: 
                 logger.debug(f"Arquivo '{pdf_file}' já estava processado e atualizado no BD (conforme status).")
+                files_in_db_this_session.add(pdf_file) # Adiciona aqui pois não passou pelo `needs_reprocessing`
         stale_files_in_status = [fname for fname in new_or_updated_processed_status if fname not in pdf_files_in_folder]
         for fname in stale_files_in_status:
             logger.info(f"Removendo '{fname}' do status e do ChromaDB (arquivo não encontrado na pasta de dados).")
@@ -255,70 +252,35 @@ class RAGCore:
                 meta = item.get('metadata', {})
                 source_info = f"Fonte: {meta.get('source', 'Desconhecida')}, Página: {meta.get('page_number', 'N/A')}"
                 context_parts.append(f"{source_info}\nTrecho do Documento:\n{doc_text}")
-            
             context_str = "\n\n---\n\n".join(context_parts)
-            
             citation_instruction = ""
             if config.ALWAYS_INCLUDE_PAGE_IN_ANSWER:
                 citation_instruction = (
                     f"**Ao fornecer sua resposta, você DEVE citar explicitamente o nome do arquivo (Fonte) e o número da página de onde a informação principal foi retirada (ex: 'Esta informação pode ser encontrada em Documento X, Página Y.').** "
-                    f"Se a informação for sintetizada de múltiplas fontes, cite as principais. "
-                )
+                    f"Se a informação for sintetizada de múltiplas fontes, cite as principais. ")
             else:
-                # Instrução mais branda se o flag for False
                 citation_instruction = (
-                    f"Se possível, ao fornecer informações específicas, mencione o nome do arquivo (Fonte) e o número da página de onde a informação foi retirada. "
-                )
-            
+                    f"Se possível, ao fornecer informações específicas, mencione o nome do arquivo (Fonte) e o número da página de onde a informação foi retirada. ")
             prompt_message = (
                 f"Com base nos seguintes trechos de documentos (cada um com sua fonte e página indicadas), responda à pergunta do usuário de forma concisa e informativa.\n"
-                f"{citation_instruction}\n" # Instrução de citação inserida aqui
+                f"{citation_instruction}\n"
                 f"Se a informação não estiver nos trechos fornecidos, indique claramente que não foi encontrada nos documentos.\n"
                 f"Priorize informações diretamente contidas nos trechos.\n\n"
                 f"Contexto dos Documentos:\n{context_str}\n\n"
-                f"Pergunta do Usuário: {query}\n\n"
-                f"Assistente:"
-            )
-
+                f"Pergunta do Usuário: {query}\n\nAssistente:")
         logger.info(f"Enviando prompt para Ollama (modelo: {self.configured_ollama_model})...")
-        # if config.PRINT_DEBUG_CHUNKS: # Ou um novo flag para debug de prompt
-        #     print(f"\n--- PROMPT PARA LLM ---\n{prompt_message}\n-------------------------\n")
         try:
-            response = ollama.chat(
-                model=self.configured_ollama_model,
-                messages=[{'role': 'user', 'content': prompt_message}]
-            )
+            response = ollama.chat(model=self.configured_ollama_model, messages=[{'role': 'user', 'content': prompt_message}])
             if response and 'message' in response and 'content' in response['message']:
                 return response['message']['content'].strip()
             else:
                 logger.error(f"Resposta inesperada do Ollama: {response}")
-                return "Erro: O LLM retornou uma resposta em formato inesperado."
+                return "Erro: LLM retornou resposta em formato inesperado."
         except Exception as e:
-            logger.error(f"Erro ao comunicar com Ollama (modelo: {self.configured_ollama_model}): {e}", exc_info=True)
+            logger.error(f"Erro ao comunicar com Ollama: {e}", exc_info=True)
             return f"Erro ao comunicar com o LLM: {e}"
 
-if __name__ == '__main__':
-    logger.info(f"Modo de teste RAGCore. Embedding: '{config.DEFAULT_EMBEDDING_MODEL}', Ollama: '{config.DEFAULT_OLLAMA_MODEL}'")
-    if config.PRINT_DEBUG_CHUNKS: logger.info("Depuração de chunks ATIVADA.")
-    else: logger.info("Depuração de chunks DESATIVADA.")
-    if config.ALWAYS_INCLUDE_PAGE_IN_ANSWER: logger.info("Citação de página SEMPRE ATIVADA.")
-    else: logger.info("Citação de página OPCIONAL/BRANDA.")
-
-
-    try:
-        rag_system = RAGCore() 
-        if rag_system.collection.count() > 0:
-            test_queries = [
-                "Qual o tema principal do edital 0302025?", 
-                "Quais são os prazos importantes?",
-                "Existe alguma informação sobre bolsas? Em qual página está?" 
-            ]
-            for tq in test_queries:
-                answer = rag_system.answer_query(tq)
-                print(f"\nConsulta: {tq}\nResposta: {answer}\n{'-'*30}")
-        else:
-            print(f"Sistema RAG inicializado, mas sem documentos no ChromaDB. Verifique '{config.DEFAULT_DATA_FOLDER}'.")
-            print("Para testar, adicione arquivos PDF à pasta 'data' (relativa à raiz do projeto) e reinicie.")
-    except Exception as e:
-        print(f"Erro crítico no teste do RAGCore: {e}")
-        logger.error("Erro crítico no __main__ do RAGCore", exc_info=True)
+# O bloco if __name__ == '__main__' foi removido para simplificar o arquivo
+# e torná-lo puramente um módulo de classe.
+# Os testes interativos agora são responsabilidade primária do rag_terminal.py
+# ou de scripts de teste dedicados.

@@ -1,13 +1,22 @@
 # src/rag_app/config.py
 
+from typing import List # Adicionar esta importação
+
 # --- Configurações Globais e Flags de Depuração ---
 PRINT_DEBUG_CHUNKS: bool = True
 SHOW_CHAT_TIMESTAMPS: bool = True
+ALWAYS_INCLUDE_PAGE_IN_ANSWER: bool = True 
 
-# --- NOVA FLAG PARA CITAÇÃO DE PÁGINA ---
-# Se True, o LLM será instruído a TENTAR SEMPRE incluir a fonte e página na resposta.
-# Se False, a instrução será mais branda ou dependerá de perguntas específicas sobre a fonte.
-ALWAYS_INCLUDE_PAGE_IN_ANSWER: bool = True # Default para False (respostas mais concisas)
+# --- NOVA LISTA DE COMANDOS DE SAÍDA ---
+# Palavras-chave para finalizar a execução dos loops interativos.
+# Serão comparadas em minúsculas.
+EXIT_COMMANDS: List[str] = [
+    "sair", "saia", "exit", "quit", "q",
+    "parar", "pare", "stop",
+    "finalizar", "finalize", "fim", "end",
+    "fechar", "close",
+    "terminar", "terminate", "bye"
+]
 
 # Modelos padrão a serem utilizados
 DEFAULT_OLLAMA_MODEL: str = "llama3:latest"
