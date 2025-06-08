@@ -279,9 +279,11 @@ class RAGCore:
         return self.query_llm(query, retrieved_items)
         
     def query_llm(self, query: str, context_items: List[Dict[str, Any]]) -> str:
-        # ... (método permanece o mesmo da versão anterior) ...
+        """Envia consulta e contexto (com metadados) para o LLM via Ollama."""
+        
         if not context_items:
-            prompt_message = (f"Pergunta do Usuário: {query}\n\nAssistente: Não encontrei informações específicas nos documentos fornecidos.")
+            prompt_message = (f"Pergunta do Usuário: {query}\n\nAssistente: "
+                              "Não encontrei informações específicas nos documentos fornecidos para responder a esta pergunta.")
         else:
             context_parts = []
             for item in context_items:
@@ -290,18 +292,30 @@ class RAGCore:
                 content_type = "Tabela" if meta.get('content_type') == 'table' else "Trecho de Texto"
                 source_info = f"Fonte: {meta.get('source', 'Desconhecida')}, Página: {meta.get('page_number', 'N/A')}"
                 context_parts.append(f"{source_info} ({content_type}):\n{doc_text}")
+            
             context_str = "\n\n---\n\n".join(context_parts)
+            
             citation_instruction = ""
             if config.ALWAYS_INCLUDE_PAGE_IN_ANSWER:
                 citation_instruction = ("**Ao fornecer sua resposta, você DEVE citar explicitamente a fonte e página da informação (ex: 'Conforme Documento X, Página Y...').** ")
             else:
                 citation_instruction = ("Se possível, mencione a fonte e página da informação. ")
+            
+            # --- INÍCIO DA MUDANÇA NO PROMPT ---
+            # Adicionamos uma instrução explícita para corrigir premissas falsas.
             prompt_message = (
-                f"Com base nos seguintes trechos e tabelas de documentos, responda à pergunta do usuário.\n"
+                f"Sua tarefa é ser um assistente factual e preciso. Responda à pergunta do usuário estritamente com base nos trechos e tabelas de documentos fornecidos no contexto.\n"
+                f"**Regra Importante: Se a pergunta do usuário contiver uma premissa que é falsa ou não suportada pelo contexto, sua primeira prioridade é corrigir essa premissa de forma clara e direta.** "
+                f"Por exemplo, se o usuário perguntar 'Quais os detalhes do curso de Medicina?' e o contexto não mencionar tal curso, você deve responder 'O documento não menciona um curso de Medicina. Os cursos mencionados são...'.\n"
                 f"{citation_instruction}\n"
-                f"Se a informação não estiver no contexto, indique que não foi encontrada.\n"
+                f"Se a informação simplesmente não estiver nos trechos, indique que não foi encontrada.\n"
+                f"Priorize sempre a veracidade baseada no contexto.\n\n"
                 f"Contexto dos Documentos:\n{context_str}\n\n"
-                f"Pergunta do Usuário: {query}\n\nAssistente:")
+                f"Pergunta do Usuário: {query}\n\n"
+                f"Assistente:"
+            )
+            # --- FIM DA MUDANÇA NO PROMPT ---
+
         logger.info(f"Enviando prompt para Ollama (modelo: {self.configured_ollama_model})...")
         try:
             response = ollama.chat(model=self.configured_ollama_model, messages=[{'role': 'user', 'content': prompt_message}])
@@ -309,7 +323,7 @@ class RAGCore:
                 return response['message']['content'].strip()
             else:
                 logger.error(f"Resposta inesperada do Ollama: {response}")
-                return "Erro: LLM retornou resposta em formato inesperado."
+                return "Erro: O LLM retornou uma resposta em formato inesperado."
         except Exception as e:
             logger.error(f"Erro ao comunicar com Ollama: {e}", exc_info=True)
             return f"Erro ao comunicar com o LLM: {e}"
