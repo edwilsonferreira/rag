@@ -88,6 +88,12 @@ data/*
 processed_files_status.json
 chroma_db_store
 
+# VENV
+.venv/*
+
+# ENV
+.env
+
 # Geral
 .DS_Store
 historico_promts.md
