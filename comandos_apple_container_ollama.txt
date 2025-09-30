@@ -1,0 +1,56 @@
+# ===============================================================================
+# COMANDOS PARA APPLE CONTAINER + OLLAMA - APLICAÇÃO RAG
+# ===============================================================================
+# Este arquivo contém todos os comandos necessários para inicializar e configurar
+# o Ollama no Apple Container para executar a aplicação RAG.
+# ===============================================================================
+
+# =============================================================================
+# 1. INICIALIZAR O APPLE CONTAINER RUNTIME
+# =============================================================================
+
+# Verificar se o Apple Container Runtime está instalado
+which container
+
+# Se não estiver instalado, instale primeiro:
+# https://github.com/apple/container
+
+# Iniciar o serviço do Apple Container Runtime
+container system start
+
+# =============================================================================
+# 2. CRIAR E CONFIGURAR CONTAINER COM OLLAMA
+# =============================================================================
+
+# Baixar e executar container Ollama em background with memory allocation
+container run -d --memory 8g --name ollama-rag -p 11434:11434 ollama/ollama:latest
+
+# Verificar se está rodando
+container ls -a
+
+# Verificar logs do container (opcional)
+container logs ollama-rag
+
+# =============================================================================
+# 3. BAIXAR O MODELO LLAMA3
+# =============================================================================
+
+# Executar comando dentro do container para baixar o modelo
+container exec ollama-rag ollama pull llama3:latest
+
+# Verificar se o modelo foi baixado
+container exec ollama-rag ollama list
+
+# =============================================================================
+# 4. CONFIGURAR REDE E ACESSO
+# =============================================================================
+
+# Verificar IP do container
+container inspect ollama-rag | grep -i address
+
+# Testar conectividade (IP confirmado: 192.168.64.3)
+curl http://192.168.64.2:11434/api/version
+
+# Alternativa: testar na porta mapeada
+curl http://localhost:11434/api/version
+

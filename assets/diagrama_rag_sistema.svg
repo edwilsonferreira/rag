@@ -1,0 +1,353 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1843pt" height="842pt" viewBox="0.00 0.00 1843.00 842.40">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 838.4)">
+<title>RAGSystem</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-838.4 1839,-838.4 1839,4 -4,4"/>
+<text text-anchor="middle" x="917.5" y="-812.4" font-family="Times,serif" font-size="20.00">Diagrama Esquemático do Sistema RAG</text>
+<g id="clust1" class="cluster">
+<title>cluster_inputs</title>
+<polygon fill="lightgrey" stroke="lightgrey" points="364,-688 364,-794.4 1034,-794.4 1034,-688 364,-688"/>
+<text text-anchor="middle" x="699" y="-772.4" font-family="Times,serif" font-size="20.00">Entradas e Configuração</text>
+</g>
+<g id="clust3" class="cluster">
+<title>cluster_rag_core_system</title>
+<polygon fill="beige" stroke="beige" points="8,-8 8,-568.4 433,-568.4 433,-8 8,-8"/>
+<text text-anchor="middle" x="220.5" y="-546.4" font-family="Times,serif" font-size="20.00">Núcleo do Sistema RAG - rag_core.py (RAGCore)</text>
+</g>
+<g id="clust4" class="cluster">
+<title>cluster_external_services</title>
+<polygon fill="none" stroke="black" points="574,-318.6 574,-423.8 1014,-423.8 1014,-318.6 574,-318.6"/>
+<text text-anchor="middle" x="794" y="-401.8" font-family="Times,serif" font-size="20.00">Modelos e Serviços Externos</text>
+</g>
+<g id="clust5" class="cluster">
+<title>cluster_outputs</title>
+<polygon fill="none" stroke="black" points="1022,-305.6 1022,-436.8 1827,-436.8 1827,-305.6 1022,-305.6"/>
+<text text-anchor="middle" x="1424.5" y="-414.8" font-family="Times,serif" font-size="20.00">Saídas do Sistema</text>
+</g>
+<!-- Config -->
+<g id="node1" class="node">
+<title>Config</title>
+<polygon fill="khaki" stroke="black" points="514.13,-754.4 371.87,-754.4 371.87,-696 520.13,-696 520.13,-748.4 514.13,-754.4"/>
+<polyline fill="none" stroke="black" points="514.13,-754.4 514.13,-748.4"/>
+<polyline fill="none" stroke="black" points="520.13,-748.4 514.13,-748.4"/>
+<text text-anchor="middle" x="446" y="-737.8" font-family="Helvetica,sans-Serif" font-size="14.00">config.py</text>
+<text text-anchor="middle" x="446" y="-721" font-family="Helvetica,sans-Serif" font-size="14.00">(Parâmetros Globais,</text>
+<text text-anchor="middle" x="446" y="-704.2" font-family="Helvetica,sans-Serif" font-size="14.00">Modelos, Caminhos)</text>
+</g>
+<!-- RAGCore -->
+<g id="node8" class="node">
+<title>RAGCore</title>
+<polygon fill="moccasin" stroke="black" points="425.25,-528.4 256.75,-528.4 256.75,-524.4 252.75,-524.4 252.75,-520.4 256.75,-520.4 256.75,-494.8 252.75,-494.8 252.75,-490.8 256.75,-490.8 256.75,-486.8 425.25,-486.8 425.25,-528.4"/>
+<polyline fill="none" stroke="black" points="256.75,-524.4 260.75,-524.4 260.75,-520.4 256.75,-520.4"/>
+<polyline fill="none" stroke="black" points="256.75,-494.8 260.75,-494.8 260.75,-490.8 256.75,-490.8"/>
+<text text-anchor="middle" x="341" y="-511.8" font-family="Helvetica,sans-Serif" font-size="14.00">RAGCore</text>
+<text text-anchor="middle" x="341" y="-495" font-family="Helvetica,sans-Serif" font-size="14.00">(Orquestração Principal)</text>
+</g>
+<!-- Config&#45;&gt;RAGCore -->
+<g id="edge1" class="edge">
+<title>Config-&gt;RAGCore</title>
+<path fill="none" stroke="black" d="M397.65,-695.73C380.86,-683.28 363.72,-667.12 353.63,-648 335.88,-614.38 335.11,-569.79 337.19,-540.19"/>
+<polygon fill="black" stroke="black" points="340.67,-540.66 338.05,-530.39 333.69,-540.05 340.67,-540.66"/>
+<text text-anchor="middle" x="390.32" y="-624.2" font-family="Helvetica,sans-Serif" font-size="10.00">lê configurações</text>
+</g>
+<!-- Config&#45;&gt;RAGCore -->
+<g id="edge26" class="edge">
+<title>Config-&gt;RAGCore</title>
+<path fill="none" stroke="black" d="M445.79,-695.77C444.61,-671.07 440.43,-634.88 427,-606.4 414.37,-579.62 392.16,-554.65 373.48,-536.64"/>
+<polygon fill="black" stroke="black" points="375.98,-534.19 366.29,-529.91 371.2,-539.3 375.98,-534.19"/>
+<text text-anchor="middle" x="483.15" y="-624.2" font-family="Helvetica,sans-Serif" font-size="10.00">controla depuração</text>
+</g>
+<!-- PDFs -->
+<g id="node2" class="node">
+<title>PDFs</title>
+<polygon fill="lightblue" stroke="black" points="649.84,-746 646.84,-750 625.84,-750 622.84,-746 538.16,-746 538.16,-704.4 649.84,-704.4 649.84,-746"/>
+<text text-anchor="middle" x="594" y="-729.4" font-family="Helvetica,sans-Serif" font-size="14.00">Pasta 'data/'</text>
+<text text-anchor="middle" x="594" y="-712.6" font-family="Helvetica,sans-Serif" font-size="14.00">(Arquivos PDF)</text>
+</g>
+<!-- PDFs&#45;&gt;RAGCore -->
+<g id="edge2" class="edge">
+<title>PDFs-&gt;RAGCore</title>
+<path fill="none" stroke="black" d="M587.25,-703.97C577.87,-678.47 558.76,-634.58 530,-606.4 496.6,-573.66 450.01,-549.39 411.45,-533.21"/>
+<polygon fill="black" stroke="black" points="412.78,-529.97 402.2,-529.43 410.14,-536.45 412.78,-529.97"/>
+<text text-anchor="middle" x="596.13" y="-624.2" font-family="Helvetica,sans-Serif" font-size="10.00">lê arquivos PDF</text>
+</g>
+<!-- UserQuery -->
+<g id="node3" class="node">
+<title>UserQuery</title>
+<ellipse fill="lightgreen" stroke="black" cx="766" cy="-725.2" rx="98.53" ry="18"/>
+<text text-anchor="middle" x="766" y="-721" font-family="Helvetica,sans-Serif" font-size="14.00">Consulta do Usuário</text>
+</g>
+<!-- StreamlitApp -->
+<g id="node5" class="node">
+<title>StreamlitApp</title>
+<path fill="lightcyan" stroke="black" d="M832.8,-648C832.8,-648 685.2,-648 685.2,-648 679.2,-648 673.2,-642 673.2,-636 673.2,-636 673.2,-618.4 673.2,-618.4 673.2,-612.4 679.2,-606.4 685.2,-606.4 685.2,-606.4 832.8,-606.4 832.8,-606.4 838.8,-606.4 844.8,-612.4 844.8,-618.4 844.8,-618.4 844.8,-636 844.8,-636 844.8,-642 838.8,-648 832.8,-648"/>
+<text text-anchor="middle" x="759" y="-631.4" font-family="Helvetica,sans-Serif" font-size="14.00">rag_web.py</text>
+<text text-anchor="middle" x="759" y="-614.6" font-family="Helvetica,sans-Serif" font-size="14.00">(Interface Web Streamlit)</text>
+</g>
+<!-- UserQuery&#45;&gt;StreamlitApp -->
+<g id="edge10" class="edge">
+<title>UserQuery-&gt;StreamlitApp</title>
+<path fill="none" stroke="black" d="M764.75,-707.04C763.79,-693.89 762.44,-675.38 761.29,-659.6"/>
+<polygon fill="black" stroke="black" points="764.79,-659.43 760.57,-649.71 757.81,-659.94 764.79,-659.43"/>
+</g>
+<!-- TerminalApp -->
+<g id="node6" class="node">
+<title>TerminalApp</title>
+<path fill="lightcyan" stroke="black" d="M1008.8,-648C1008.8,-648 875.2,-648 875.2,-648 869.2,-648 863.2,-642 863.2,-636 863.2,-636 863.2,-618.4 863.2,-618.4 863.2,-612.4 869.2,-606.4 875.2,-606.4 875.2,-606.4 1008.8,-606.4 1008.8,-606.4 1014.8,-606.4 1020.8,-612.4 1020.8,-618.4 1020.8,-618.4 1020.8,-636 1020.8,-636 1020.8,-642 1014.8,-648 1008.8,-648"/>
+<text text-anchor="middle" x="942" y="-631.4" font-family="Helvetica,sans-Serif" font-size="14.00">rag_terminal.py</text>
+<text text-anchor="middle" x="942" y="-614.6" font-family="Helvetica,sans-Serif" font-size="14.00">(Interface de Terminal)</text>
+</g>
+<!-- UserQuery&#45;&gt;TerminalApp -->
+<g id="edge11" class="edge">
+<title>UserQuery-&gt;TerminalApp</title>
+<path fill="none" stroke="black" d="M796.26,-707.7C823.39,-692.89 863.65,-670.94 894.98,-653.85"/>
+<polygon fill="black" stroke="black" points="896.38,-657.07 903.48,-649.21 893.03,-650.93 896.38,-657.07"/>
+</g>
+<!-- BatchQuestionsFile -->
+<g id="node4" class="node">
+<title>BatchQuestionsFile</title>
+<polygon fill="lightyellow" stroke="black" points="1019.81,-746 882.19,-746 882.19,-704.4 1025.81,-704.4 1025.81,-740 1019.81,-746"/>
+<polyline fill="none" stroke="black" points="1019.81,-746 1019.81,-740"/>
+<polyline fill="none" stroke="black" points="1025.81,-740 1019.81,-740"/>
+<text text-anchor="middle" x="954" y="-729.4" font-family="Helvetica,sans-Serif" font-size="14.00">Arquivo de Texto</text>
+<text text-anchor="middle" x="954" y="-712.6" font-family="Helvetica,sans-Serif" font-size="14.00">(Perguntas em Lote)</text>
+</g>
+<!-- BatchApp -->
+<g id="node7" class="node">
+<title>BatchApp</title>
+<path fill="lightcyan" stroke="black" d="M1318.53,-648C1318.53,-648 1165.47,-648 1165.47,-648 1159.47,-648 1153.47,-642 1153.47,-636 1153.47,-636 1153.47,-618.4 1153.47,-618.4 1153.47,-612.4 1159.47,-606.4 1165.47,-606.4 1165.47,-606.4 1318.53,-606.4 1318.53,-606.4 1324.53,-606.4 1330.53,-612.4 1330.53,-618.4 1330.53,-618.4 1330.53,-636 1330.53,-636 1330.53,-642 1324.53,-648 1318.53,-648"/>
+<text text-anchor="middle" x="1242" y="-631.4" font-family="Helvetica,sans-Serif" font-size="14.00">rag_batch_query.py</text>
+<text text-anchor="middle" x="1242" y="-614.6" font-family="Helvetica,sans-Serif" font-size="14.00">(Processamento em Lote)</text>
+</g>
+<!-- BatchQuestionsFile&#45;&gt;BatchApp -->
+<g id="edge12" class="edge">
+<title>BatchQuestionsFile-&gt;BatchApp</title>
+<path fill="none" stroke="black" d="M1014.73,-703.96C1060.2,-688.8 1122.55,-668.02 1170.44,-652.05"/>
+<polygon fill="black" stroke="black" points="1171.54,-655.38 1179.92,-648.89 1169.33,-648.73 1171.54,-655.38"/>
+<text text-anchor="middle" x="1151.31" y="-669" font-family="Helvetica,sans-Serif" font-size="10.00">lê perguntas</text>
+</g>
+<!-- StreamlitApp&#45;&gt;RAGCore -->
+<g id="edge13" class="edge">
+<title>StreamlitApp-&gt;RAGCore</title>
+<path fill="none" stroke="black" d="M690.01,-606.01C658.61,-596.87 620.95,-585.99 587,-576.4 533.71,-561.34 473.8,-544.82 426.45,-531.86"/>
+<polygon fill="black" stroke="black" points="427.65,-528.56 417.08,-529.3 425.8,-535.31 427.65,-528.56"/>
+<text text-anchor="middle" x="656.7" y="-579.4" font-family="Helvetica,sans-Serif" font-size="10.00">envia consulta</text>
+</g>
+<!-- AnswerDisplay -->
+<g id="node16" class="node">
+<title>AnswerDisplay</title>
+<ellipse fill="palegreen" stroke="black" cx="1476" cy="-355.2" rx="103.75" ry="29.42"/>
+<text text-anchor="middle" x="1476" y="-359.4" font-family="Helvetica,sans-Serif" font-size="14.00">Resposta ao Usuário</text>
+<text text-anchor="middle" x="1476" y="-342.6" font-family="Helvetica,sans-Serif" font-size="14.00">(Web/Terminal)</text>
+</g>
+<!-- StreamlitApp&#45;&gt;AnswerDisplay -->
+<g id="edge22" class="edge">
+<title>StreamlitApp-&gt;AnswerDisplay</title>
+<path fill="none" stroke="black" d="M804.26,-605.94C871.41,-576.48 1001.91,-521.56 1117,-486.8 1200.62,-461.54 1223.08,-460.54 1309,-444.8 1332.86,-440.43 1340.5,-445.87 1363,-436.8 1390.06,-425.89 1416.8,-407.27 1437.47,-390.67"/>
+<polygon fill="black" stroke="black" points="1439.56,-393.48 1445.06,-384.43 1435.12,-388.08 1439.56,-393.48"/>
+</g>
+<!-- TerminalApp&#45;&gt;RAGCore -->
+<g id="edge14" class="edge">
+<title>TerminalApp-&gt;RAGCore</title>
+<path fill="none" stroke="black" d="M862.87,-608.27C859.88,-607.63 856.91,-607.01 854,-606.4 708.97,-576.27 540.12,-544.76 436.92,-525.91"/>
+<polygon fill="black" stroke="black" points="437.55,-522.47 427.08,-524.12 436.29,-529.35 437.55,-522.47"/>
+<text text-anchor="middle" x="788.02" y="-579.4" font-family="Helvetica,sans-Serif" font-size="10.00">envia consulta</text>
+</g>
+<!-- TerminalApp&#45;&gt;AnswerDisplay -->
+<g id="edge23" class="edge">
+<title>TerminalApp-&gt;AnswerDisplay</title>
+<path fill="none" stroke="black" d="M1012.43,-605.98C1044.77,-595.92 1083.33,-582.84 1117,-568.4 1230.96,-519.53 1257.64,-502.18 1363,-436.8 1386.26,-422.37 1411.13,-404.87 1431.6,-389.87"/>
+<polygon fill="black" stroke="black" points="1433.48,-392.83 1439.45,-384.08 1429.33,-387.2 1433.48,-392.83"/>
+</g>
+<!-- BatchApp&#45;&gt;RAGCore -->
+<g id="edge15" class="edge">
+<title>BatchApp-&gt;RAGCore</title>
+<path fill="none" stroke="black" d="M1153.14,-614.6C982.96,-592.39 612.36,-544.02 436.85,-521.11"/>
+<polygon fill="black" stroke="black" points="437.44,-517.66 427.07,-519.83 436.53,-524.6 437.44,-517.66"/>
+<text text-anchor="middle" x="982.53" y="-579.4" font-family="Helvetica,sans-Serif" font-size="10.00">envia consulta</text>
+</g>
+<!-- BatchApp&#45;&gt;AnswerDisplay -->
+<g id="edge24" class="edge">
+<title>BatchApp-&gt;AnswerDisplay</title>
+<path fill="none" stroke="black" d="M1285.29,-605.93C1293.95,-600.86 1302.64,-594.97 1310,-588.4 1374.37,-530.94 1427.97,-444.23 1455.67,-394.64"/>
+<polygon fill="black" stroke="black" points="1458.69,-396.41 1460.45,-385.97 1452.56,-393.03 1458.69,-396.41"/>
+<text text-anchor="middle" x="1440.9" y="-504.6" font-family="Helvetica,sans-Serif" font-size="10.00">imprime no console</text>
+</g>
+<!-- BatchResultsFile -->
+<g id="node17" class="node">
+<title>BatchResultsFile</title>
+<polygon fill="palegreen" stroke="black" points="1812.7,-376 1597.3,-376 1597.3,-334.4 1818.7,-334.4 1818.7,-370 1812.7,-376"/>
+<polyline fill="none" stroke="black" points="1812.7,-376 1812.7,-370"/>
+<polyline fill="none" stroke="black" points="1818.7,-370 1812.7,-370"/>
+<text text-anchor="middle" x="1708" y="-359.4" font-family="Helvetica,sans-Serif" font-size="14.00">Arquivo de Saída</text>
+<text text-anchor="middle" x="1708" y="-342.6" font-family="Helvetica,sans-Serif" font-size="14.00">(Resultados em Lote TXT/JSON)</text>
+</g>
+<!-- BatchApp&#45;&gt;BatchResultsFile -->
+<g id="edge25" class="edge">
+<title>BatchApp-&gt;BatchResultsFile</title>
+<path fill="none" stroke="black" d="M1330.92,-617C1379.59,-609.16 1439.66,-594.75 1488,-568.4 1574.31,-521.35 1650.9,-431.29 1686.65,-385.09"/>
+<polygon fill="black" stroke="black" points="1689.24,-387.47 1692.53,-377.4 1683.67,-383.22 1689.24,-387.47"/>
+<text text-anchor="middle" x="1631.74" y="-504.6" font-family="Helvetica,sans-Serif" font-size="10.00">grava resultados</text>
+</g>
+<!-- TextExtractor -->
+<g id="node9" class="node">
+<title>TextExtractor</title>
+<polygon fill="moccasin" stroke="black" points="552.69,-370 441.31,-370 441.31,-340.4 552.69,-340.4 564.69,-355.2 552.69,-370"/>
+<text text-anchor="middle" x="503" y="-359.4" font-family="Helvetica,sans-Serif" font-size="14.00">Extrator de Texto</text>
+<text text-anchor="middle" x="503" y="-342.6" font-family="Helvetica,sans-Serif" font-size="14.00">(PyMuPDF)</text>
+</g>
+<!-- RAGCore&#45;&gt;TextExtractor -->
+<g id="edge3" class="edge">
+<title>RAGCore-&gt;TextExtractor</title>
+<path fill="none" stroke="black" d="M399.14,-486.44C409.02,-481.55 418.74,-475.7 427,-468.8 454.25,-446.05 475.73,-411.14 488.8,-386.22"/>
+<polygon fill="black" stroke="black" points="491.79,-388.07 493.2,-377.57 485.55,-384.9 491.79,-388.07"/>
+<text text-anchor="middle" x="474.79" y="-453.8" font-family="Helvetica,sans-Serif" font-size="10.00">extrai texto</text>
+</g>
+<!-- Embedder -->
+<g id="node11" class="node">
+<title>Embedder</title>
+<polygon fill="moccasin" stroke="black" points="602.27,-170 445.73,-170 445.73,-140.4 602.27,-140.4 614.27,-155.2 602.27,-170"/>
+<text text-anchor="middle" x="530" y="-159.4" font-family="Helvetica,sans-Serif" font-size="14.00">Gerador de Embeddings</text>
+<text text-anchor="middle" x="530" y="-142.6" font-family="Helvetica,sans-Serif" font-size="14.00">(SentenceTransformers)</text>
+</g>
+<!-- RAGCore&#45;&gt;Embedder -->
+<g id="edge16" class="edge">
+<title>RAGCore-&gt;Embedder</title>
+<path fill="none" stroke="black" d="M344.09,-486.4C351.84,-437.8 373.25,-316 397.8,-283.6 407.47,-270.84 416.49,-275.6 429,-265.6 458.95,-241.66 488.1,-208.74 507.32,-185.28"/>
+<polygon fill="black" stroke="black" points="509.91,-187.64 513.48,-177.66 504.47,-183.24 509.91,-187.64"/>
+<text text-anchor="middle" x="460.9" y="-286.6" font-family="Helvetica,sans-Serif" font-size="10.00">para embedding da consulta</text>
+</g>
+<!-- StatusManager -->
+<g id="node12" class="node">
+<title>StatusManager</title>
+<path fill="lightpink" stroke="black" d="M321.65,-378.6C321.65,-381.47 277.44,-383.8 223,-383.8 168.56,-383.8 124.35,-381.47 124.35,-378.6 124.35,-378.6 124.35,-331.8 124.35,-331.8 124.35,-328.93 168.56,-326.6 223,-326.6 277.44,-326.6 321.65,-328.93 321.65,-331.8 321.65,-331.8 321.65,-378.6 321.65,-378.6"/>
+<path fill="none" stroke="black" d="M321.65,-378.6C321.65,-375.73 277.44,-373.4 223,-373.4 168.56,-373.4 124.35,-375.73 124.35,-378.6"/>
+<text text-anchor="middle" x="223" y="-359.4" font-family="Helvetica,sans-Serif" font-size="14.00">Gerenciador de Status</text>
+<text text-anchor="middle" x="223" y="-342.6" font-family="Helvetica,sans-Serif" font-size="14.00">(processed_files_status.json)</text>
+</g>
+<!-- RAGCore&#45;&gt;StatusManager -->
+<g id="edge8" class="edge">
+<title>RAGCore-&gt;StatusManager</title>
+<path fill="none" stroke="black" d="M293.05,-486.4C284.98,-481.49 277.21,-475.64 270.97,-468.8 252.02,-448.02 239.85,-418.63 232.5,-395.09"/>
+<polygon fill="black" stroke="black" points="235.87,-394.13 229.7,-385.52 229.15,-396.1 235.87,-394.13"/>
+<text text-anchor="middle" x="303.49" y="-453.8" font-family="Helvetica,sans-Serif" font-size="10.00">lê/grava status</text>
+</g>
+<!-- ChromaDB -->
+<g id="node13" class="node">
+<title>ChromaDB</title>
+<path fill="lightgoldenrodyellow" stroke="black" d="M386.29,-74.4C386.29,-74.4 243.71,-74.4 243.71,-74.4 237.71,-74.4 231.71,-68.4 231.71,-62.4 231.71,-62.4 231.71,-28 231.71,-28 231.71,-22 237.71,-16 243.71,-16 243.71,-16 386.29,-16 386.29,-16 392.29,-16 398.29,-22 398.29,-28 398.29,-28 398.29,-62.4 398.29,-62.4 398.29,-68.4 392.29,-74.4 386.29,-74.4"/>
+<text text-anchor="middle" x="315" y="-57.8" font-family="Helvetica,sans-Serif" font-size="14.00">ChromaDB</text>
+<text text-anchor="middle" x="315" y="-41" font-family="Helvetica,sans-Serif" font-size="14.00">(chroma_db_store/)</text>
+<text text-anchor="middle" x="315" y="-24.2" font-family="Helvetica,sans-Serif" font-size="14.00">(Chunks + Embeddings)</text>
+</g>
+<!-- RAGCore&#45;&gt;ChromaDB -->
+<g id="edge17" class="edge">
+<title>RAGCore-&gt;ChromaDB</title>
+<path fill="none" stroke="black" d="M342.18,-486.34C343.84,-449.75 345.21,-370.44 331,-305.6 326.9,-286.89 318.57,-284.41 314.94,-265.6 311.43,-247.45 314.93,-242.49 314.94,-224 314.94,-176.72 314.97,-122.36 314.98,-86.32"/>
+<polygon fill="black" stroke="black" points="318.48,-86.35 314.99,-76.35 311.48,-86.35 318.48,-86.35"/>
+<text text-anchor="middle" x="369.97" y="-241.8" font-family="Helvetica,sans-Serif" font-size="10.00">busca chunks relevantes</text>
+</g>
+<!-- OllamaServer -->
+<g id="node15" class="node">
+<title>OllamaServer</title>
+<path fill="lightskyblue" stroke="black" stroke-dasharray="5,2" d="M1006.17,-378.6C1006.17,-381.47 960.37,-383.8 904,-383.8 847.63,-383.8 801.83,-381.47 801.83,-378.6 801.83,-378.6 801.83,-331.8 801.83,-331.8 801.83,-328.93 847.63,-326.6 904,-326.6 960.37,-326.6 1006.17,-328.93 1006.17,-331.8 1006.17,-331.8 1006.17,-378.6 1006.17,-378.6"/>
+<path fill="none" stroke="black" stroke-dasharray="5,2" d="M1006.17,-378.6C1006.17,-375.73 960.37,-373.4 904,-373.4 847.63,-373.4 801.83,-375.73 801.83,-378.6"/>
+<text text-anchor="middle" x="904" y="-359.4" font-family="Helvetica,sans-Serif" font-size="14.00">Servidor Ollama</text>
+<text text-anchor="middle" x="904" y="-342.6" font-family="Helvetica,sans-Serif" font-size="14.00">(LLM Hospedado Localmente)</text>
+</g>
+<!-- RAGCore&#45;&gt;OllamaServer -->
+<g id="edge19" class="edge">
+<title>RAGCore-&gt;OllamaServer</title>
+<path fill="none" stroke="black" d="M425.52,-488.65C450.6,-482.85 478.03,-476.03 503,-468.8 534.19,-459.76 540.1,-450.79 572.01,-444.8 620.31,-435.74 746.54,-452.82 793,-436.8 820.46,-427.33 846.94,-408.59 867.15,-391.56"/>
+<polygon fill="black" stroke="black" points="869.29,-394.34 874.55,-385.15 864.71,-389.05 869.29,-394.34"/>
+<text text-anchor="middle" x="615.51" y="-459.8" font-family="Helvetica,sans-Serif" font-size="10.00">envia prompt</text>
+<text text-anchor="middle" x="615.51" y="-447.8" font-family="Helvetica,sans-Serif" font-size="10.00">(consulta + chunks)</text>
+</g>
+<!-- RAGCore&#45;&gt;AnswerDisplay -->
+<g id="edge21" class="edge">
+<title>RAGCore-&gt;AnswerDisplay</title>
+<path fill="none" stroke="black" d="M425.69,-504.57C580.59,-500.37 897.94,-489.37 944,-468.8 957.88,-462.6 954.37,-450.71 968.38,-444.8 1008.79,-427.77 1321.37,-450.59 1363,-436.8 1391.1,-427.49 1418.24,-408.56 1438.89,-391.39"/>
+<polygon fill="black" stroke="black" points="1441.14,-394.06 1446.45,-384.9 1436.58,-388.75 1441.14,-394.06"/>
+<text text-anchor="middle" x="1028.69" y="-453.8" font-family="Helvetica,sans-Serif" font-size="10.00">retorna resposta formatada</text>
+</g>
+<!-- DebugChunks -->
+<g id="node18" class="node">
+<title>DebugChunks</title>
+<polygon fill="none" stroke="black" stroke-dasharray="5,2" points="1353.82,-396.8 1096.4,-396.8 1030.18,-313.6 1287.6,-313.6 1353.82,-396.8"/>
+<text text-anchor="middle" x="1192" y="-359.4" font-family="Helvetica,sans-Serif" font-size="14.00">Chunks de Depuração</text>
+<text text-anchor="middle" x="1192" y="-342.6" font-family="Helvetica,sans-Serif" font-size="14.00">(Console)</text>
+</g>
+<!-- RAGCore&#45;&gt;DebugChunks -->
+<g id="edge27" class="edge">
+<title>RAGCore-&gt;DebugChunks</title>
+<path fill="none" stroke="black" d="M425.51,-505.48C530.32,-502.96 702.25,-494.87 760,-468.8 774.14,-462.42 771.04,-450.79 785.35,-444.8 809.21,-434.82 992.84,-442.8 1018,-436.8 1049.29,-429.34 1081.75,-416.03 1110.04,-402.34"/>
+<polygon fill="black" stroke="black" points="1111.49,-405.53 1118.91,-397.96 1108.39,-399.25 1111.49,-405.53"/>
+<text text-anchor="middle" x="864.67" y="-453.8" font-family="Helvetica,sans-Serif" font-size="10.00">se PRINT_DEBUG_CHUNKS=True</text>
+</g>
+<!-- Chunker -->
+<g id="node10" class="node">
+<title>Chunker</title>
+<polygon fill="moccasin" stroke="black" points="595.92,-259.6 486.08,-259.6 486.08,-230 595.92,-230 607.92,-244.8 595.92,-259.6"/>
+<text text-anchor="middle" x="547" y="-249" font-family="Helvetica,sans-Serif" font-size="14.00">Divisor de Texto</text>
+<text text-anchor="middle" x="547" y="-232.2" font-family="Helvetica,sans-Serif" font-size="14.00">(Chunking Logic)</text>
+</g>
+<!-- TextExtractor&#45;&gt;Chunker -->
+<g id="edge4" class="edge">
+<title>TextExtractor-&gt;Chunker</title>
+<path fill="none" stroke="black" d="M511.17,-334.06C517.75,-317.86 527.1,-294.84 534.59,-276.36"/>
+<polygon fill="black" stroke="black" points="537.78,-277.81 538.3,-267.23 531.3,-275.18 537.78,-277.81"/>
+<text text-anchor="middle" x="563.2" y="-286.6" font-family="Helvetica,sans-Serif" font-size="10.00">texto extraído</text>
+</g>
+<!-- Chunker&#45;&gt;Embedder -->
+<g id="edge5" class="edge">
+<title>Chunker-&gt;Embedder</title>
+<path fill="none" stroke="black" d="M543.14,-223.92C541.05,-213.13 538.41,-199.55 536.05,-187.39"/>
+<polygon fill="black" stroke="black" points="539.53,-186.94 534.19,-177.79 532.66,-188.27 539.53,-186.94"/>
+<text text-anchor="middle" x="574.54" y="-197" font-family="Helvetica,sans-Serif" font-size="10.00">chunks de texto</text>
+</g>
+<!-- Embedder&#45;&gt;ChromaDB -->
+<g id="edge7" class="edge">
+<title>Embedder-&gt;ChromaDB</title>
+<path fill="none" stroke="black" d="M489.81,-134.01C459.61,-118.84 417.55,-97.72 382.26,-79.99"/>
+<polygon fill="black" stroke="black" points="383.88,-76.88 373.37,-75.52 380.74,-83.14 383.88,-76.88"/>
+<text text-anchor="middle" x="507.69" y="-107.4" font-family="Helvetica,sans-Serif" font-size="10.00">grava chunks,</text>
+<text text-anchor="middle" x="507.69" y="-95.4" font-family="Helvetica,sans-Serif" font-size="10.00">embeddings, metadatos</text>
+</g>
+<!-- SentenceTransformerModel -->
+<g id="node14" class="node">
+<title>SentenceTransformerModel</title>
+<polygon fill="thistle" stroke="black" points="783.6,-376 586.4,-376 582.4,-372 582.4,-334.4 779.6,-334.4 783.6,-338.4 783.6,-376"/>
+<polyline fill="none" stroke="black" points="779.6,-372 582.4,-372"/>
+<polyline fill="none" stroke="black" points="779.6,-372 779.6,-334.4"/>
+<polyline fill="none" stroke="black" points="779.6,-372 783.6,-376"/>
+<text text-anchor="middle" x="683" y="-359.4" font-family="Helvetica,sans-Serif" font-size="14.00">Modelo SentenceTransformer</text>
+<text text-anchor="middle" x="683" y="-342.6" font-family="Helvetica,sans-Serif" font-size="14.00">(downloaded)</text>
+</g>
+<!-- Embedder&#45;&gt;SentenceTransformerModel -->
+<g id="edge6" class="edge">
+<title>Embedder-&gt;SentenceTransformerModel</title>
+<path fill="none" stroke="black" stroke-dasharray="1,5" d="M590.06,-176.48C598.81,-181.26 607.16,-187.05 614,-194 649.59,-230.17 668.15,-287.62 676.73,-323"/>
+<polygon fill="black" stroke="black" points="673.28,-323.65 678.93,-332.61 680.11,-322.09 673.28,-323.65"/>
+<text text-anchor="middle" x="683.9" y="-241.8" font-family="Helvetica,sans-Serif" font-size="10.00">usa modelo</text>
+</g>
+<!-- StatusManager&#45;&gt;RAGCore -->
+<g id="edge9" class="edge">
+<title>StatusManager-&gt;RAGCore</title>
+<path fill="none" stroke="black" d="M223.15,-383.88C224.71,-408.81 230.68,-445.09 251,-468.8 254.7,-473.11 258.97,-476.94 263.6,-480.35"/>
+<polygon fill="black" stroke="black" points="261.33,-483.05 271.62,-485.55 265.14,-477.17 261.33,-483.05"/>
+</g>
+<!-- ChromaDB&#45;&gt;RAGCore -->
+<g id="edge18" class="edge">
+<title>ChromaDB-&gt;RAGCore</title>
+<path fill="none" stroke="black" d="M231.4,-55.85C172.84,-67.82 105,-94.55 105,-154.2 105,-356.2 105,-356.2 105,-356.2 105,-392.3 91.82,-409.13 115,-436.8 146.85,-474.82 198.96,-492.5 245.12,-500.57"/>
+<polygon fill="black" stroke="black" points="244.48,-504.02 254.91,-502.14 245.59,-497.1 244.48,-504.02"/>
+<text text-anchor="middle" x="150.03" y="-241.8" font-family="Helvetica,sans-Serif" font-size="10.00">chunks recuperados</text>
+</g>
+<!-- OllamaServer&#45;&gt;RAGCore -->
+<g id="edge20" class="edge">
+<title>OllamaServer-&gt;RAGCore</title>
+<path fill="none" stroke="black" d="M875.11,-384.18C854.14,-402.63 824.08,-425.41 793,-436.8 748.02,-453.28 729.54,-425.93 685.51,-444.8 670.9,-451.06 673.47,-462.22 659,-468.8 620.59,-486.27 515.94,-496.32 437.1,-501.6"/>
+<polygon fill="black" stroke="black" points="436.93,-498.1 427.17,-502.24 437.38,-505.08 436.93,-498.1"/>
+<text text-anchor="middle" x="722.76" y="-453.8" font-family="Helvetica,sans-Serif" font-size="10.00">resposta do LLM</text>
+</g>
+</g>
+</svg>

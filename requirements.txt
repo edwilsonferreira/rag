@@ -1,0 +1,9 @@
+pymupdf
+sentence-transformers
+faiss-cpu
+ollama
+numpy
+streamlit
+chromadb
+google-generativeai
+python-dotenv

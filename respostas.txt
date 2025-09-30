@@ -1,0 +1,136 @@
+Pergunta 1:
+P: 1. O que significa ter cursado integralmente o ensino fundamental em escola pública, conforme exigido como ponto de partida no fluxograma? Se eu estudei um ano em uma escola particular, mas o restante foi em escola pública, ainda posso seguir o caminho das Cotas L2 a L9?
+R: Excelente pergunta!
+
+De acordo com os documentos fornecidos (cotas.md, Página 1), o ponto inicial para determinar a elegibilidade é responder à pergunta: "Cursou integralmente o ensino fundamental em escola pública?".
+
+Uma análise do fluxograma revela que se a resposta for **NÃO**, o candidato segue diretamente para a avaliação da deficiência, resultando na Cota L1 ou na Ampla Concorrência. Se a resposta for **SIM**, o candidato pode seguir o caminho das Cotas L2 a L9.
+
+No entanto, é importante ressaltar que, de acordo com os documentos (todos-os-anexos.pdf, Página 38), para concorrer à vaga reservada (cotas), o candidato deve ter cursado do 1º ao 8º/9º ano do ensino fundamental na rede pública de ensino (municipal, estadual ou federal).
+
+No seu caso, se você estudou um ano em uma escola particular e o restante foi em escola pública, ainda pode seguir o caminho das Cotas L2 a L9, desde que atenda ao requisito de ter cursado integralmente o ensino fundamental na rede pública de ensino (Municipal, Estadual ou Federal).
+
+Fonte: cotas.md, Página 1 e todos-os-anexos.pdf, Página 38.
+
+**Resposta:** Sim, você pode seguir o caminho das Cotas L2 a L9.
+----------------------------------------
+
+Pergunta 2:
+P: 2. Como exatamente eu calculo a renda bruta mensal igual ou inferior a 1 salário mínimo per capita para saber se me enquadro nas cotas L2, L3, L4 ou L5?
+R: Como assistente factual e preciso, minha resposta será baseada nos trechos e tabelas dos documentos fornecidos.
+
+Para calcular a renda bruta mensal igual ou inferior a 1 salário mínimo per capita para saber se você se enquadra nas cotas L2, L3, L4 ou L5, é necessário verificar o requisito de renda mencionado nos documentos.
+
+No trecho de texto da página 17 do edital-0902025.pdf, é mencionado que a comprovação da condição de renda dos candidatos autodeclarados de baixa renda pode ser feita por meio da Folha Resumo ou da certidão de cadastro do Cadastro Único. No entanto, não há uma fórmula específica para calcular a renda bruta mensal igual ou inferior a 1 salário mínimo per capita.
+
+Já no trecho de texto da página 36 do todos-os-anexos.pdf, é mencionado que o critério de renda é menor ou igual a 1,0 (um) salário mínimo, apurada com base nos valores percebidos nos três meses anteriores à data de inscrição.
+
+Portanto, para calcular a renda bruta mensal igual ou inferior a 1 salário mínimo per capita, você precisaria ter informações sobre o valor do salário mínimo e os valores percebidos nos três meses anteriores à data de inscrição. Além disso, é necessário verificar se a sua renda está abaixo da média de renda familiar para determinar qual cota você se enquadra.
+
+Fonte: edital-0902025.pdf, Página: 17 e todos-os-anexos.pdf, Página: 36.
+----------------------------------------
+
+Pergunta 3:
+P: 3. Quais documentos eu preciso reunir para comprovar a renda da minha família, especialmente se meus pais forem trabalhadores autônomos ou desempregados?
+R: Fonte: edital-0902025.pdf, Página: 35 (Trecho de Texto); Fonte: todos-os-anexos.pdf, Página: 22 (Trecho de Texto)
+
+Para comprovar a renda da sua família, especialmente se seus pais forem trabalhadores autônomos ou desempregados, você precisará apresentar os seguintes documentos:
+
+* Se os pais forem trabalhadores autônomos:
+	+ Declaração de IRPF (Imposto de Renda) acompanhada do recibo de entrega à Receita Federal do Brasil e da respectiva notificação de restituição, quando houver;
+	+ Extratos bancários dos últimos 3 meses que antecedem a inscrição no processo seletivo.
+* Se os pais forem desempregados:
+	+ Comprovante do seguro-desemprego, se houver declaração de ausência de renda;
+	+ Extratos bancários dos últimos 3 meses que antecedem a inscrição no processo seletivo.
+
+Além disso, é importante verificar o item 4.8 do documento todos-os-anexos.pdf, Página: 23 (Trecho de Texto), que menciona a apresentação de documentação conforme o item 4.5 acima para os que desenvolvem alguma atividade remunerada informalmente.
+
+Lembre-se de que você precisará apresentar cópias legíveis dos documentos acompanhadas dos respectivos originais, para que seja verificada a autenticidade.
+----------------------------------------
+
+Pergunta 4:
+P: 4. Se eu me declarei preto ou pardo (PPI) para as cotas L2, L4, L6 ou L8, como será feita a verificação? Terei que fazer uma entrevista presencial ou online?
+R: Olá! Como assistente factual e preciso, vou responder sua pergunta com base nos documentos fornecidos. 
+
+Para as cotas L2, L4, L6 ou L8, que requerem a autodeclaração como preto, pardo ou indígena (PPI), não há menção à necessidade de entrevista presencial ou online na fonte "cotas.md", Página: 1.
+
+**Fonte:** cotas.md, Página: 1 (Trecho de Texto):
+
+**Cota L2** | SIM (Escola Pública) | SIM (Renda $\leq 1$ SM *per capita*) | SIM (Pessoa com deficiência) | SIM (Autodeclarado preto, pardo ou indígena) |
+
+Como não há informações específicas sobre o processo de verificação para a autodeclaração PPI nesse contexto, sinto-me limitado em fornecer mais detalhes.
+----------------------------------------
+
+Pergunta 5:
+P: 5. Qual é a validade do laudo médico para comprovar a deficiência (PcD)? Preciso enviá-lo já na inscrição ou somente na matrícula?
+R: Resposta:
+
+A validade do laudo médico para comprovar a deficiência (PcD) é indeterminada, exceto nos casos de autismo e deficiências permanentes. Isso está estabelecido no subitem 1.4.4 do Anexo XXIII, página 47: "exceto nos casos de autismo e deficiências permanentes, assinado por médico especializado na área".
+
+Portanto, para comprovar a deficiência (PcD), você não precisa enviar o laudo médico logo na inscrição. A documentação solicitada deve ser enviada no ato da inscrição.
+
+Fonte: todos-os-anexos.pdf, Página: 47
+----------------------------------------
+
+Pergunta 6:
+P: 6. Eu terminei o 9º ano, mas o meu Histórico Escolar oficial só será emitido pela minha escola atual após o período de matrícula do IFMT. Posso me matricular?
+R: A pergunta do usuário está relacionada ao contexto dos documentos fornecidos.
+
+Para responder à pergunta, é importante verificar se a informação contida nos documentos fornece alguma orientação sobre o que fazer em casos como este.
+
+Na página 31 do edital-0902025.pdf (Trecho de Texto), é mencionado que "Histórico escolar do nível anterior de ensino devidamente registrado, para as ações afirmativas de escola pública das cotas (L2, L3, L4, L5, L6, L7, L8, L9), o histórico escolar deverá constar do 1º ao 8º/9º ano, do ensino fundamental na rede pública.".
+
+Além disso, na página 15 de todos-os-anexos.pdf (Trecho de Texto), é mencionado que "ações afirmativas de escola pública das cotas (L2, L3, L4, L5, L6, L7, L8, L9), o histórico escolar deverá constar todos os anos do ensino fundamental 1º ao 8º/9º ano, na rede pública."
+
+Como o usuário terminou o 9º ano e o seu Histórico Escolar oficial será emitido após o período de matrícula do IFMT, não há informações nos documentos que indiquem que isso seja um obstáculo para a matrícula. Portanto, posso responder que sim, você pode se matricular.
+
+Fonte: edital-0902025.pdf, Página: 31 (Trecho de Texto); todos-os-anexos.pdf, Página: 15 (Trecho de Texto).
+
+Resposta: Sim, você pode se matricular.
+----------------------------------------
+
+Pergunta 7:
+P: 7. Minha escola fundamental era uma escola conveniada, filantrópica ou do "Sistema S" (SENAI/SESI). Isso me permite concorrer às vagas de cota?
+R: Minha resposta é negativa. O contexto dos documentos não menciona que escolas conveniadas, filantrópicas ou do "Sistema S" (SENAI/SESI) sejam consideradas como escolas públicas para fins de cota.
+
+Fonte: cotas.md, Página: 1
+
+(Campo L1: "Cursou integralmente o ensino fundamental em escola pública?")
+
+* **Requisitos Obrigatórios:** 1. **NÃO** cursou integralmente o ensino fundamental em escola pública.
+2. É **Pessoa com deficiência** (Resposta: SIM).
+
+E, Fonte: todos-os-anexos.pdf, Página: 38
+
+* 2.5. Para concorrer à vaga reservada (cotas), o candidato deverá ter cursado do 1º ao 8º/9º ano do ensino fundamental na rede pública de ensino (municipal, estadual ou federal).
+
+Portanto, não há possibilidade de concorrer às vagas de cota com base na sua escola fundamental.
+----------------------------------------
+
+Pergunta 8:
+P: 8. Se eu errar a modalidade de cota ou o curso escolhido na inscrição, posso corrigir depois de pagar a taxa?
+R: O documento oficial não aborda especificamente o cenário de erro na modalidade de cota ou curso escolhido na inscrição após o pagamento da taxa. Portanto, é importante priorizar a veracidade baseada no contexto.
+
+Como o sistema de cotas é dividido em dois caminhos principais, dependendo da formação escolar do candidato (cursos integralmente cursado ou não), e a modalidade de cota é determinada após responder à pergunta "Cursou integralmente o ensino fundamental em escola pública?" (cotas L1-L9) ou não (Ampla concorrência), não há informações sobre correções possíveis.
+
+Fonte: cotas.md, Página: 1
+
+Resposta: Não há informações nos documentos fornecidos que abordem a situação específica de erro na modalidade de cota ou curso escolhido após o pagamento da taxa.
+----------------------------------------
+
+Pergunta 9:
+P: 9. A prova objetiva é eliminatória? Posso ser eliminado se zerar em apenas uma das matérias (Língua Portuguesa/Literatura, Matemática ou Ciências da Natureza)?
+R: Sim, a prova objetiva é eliminatória. Segundo o trecho de texto na página 19 do edital-0902025.pdf, será eliminado o candidato que tiver nota zero em uma das três áreas grandes (Língua Portuguesa/Literatura, Matemática ou Ciências da Natureza). Fonte: edital-0902025.pdf, Página: 19.
+----------------------------------------
+
+Pergunta 10:
+P: 10. Se eu não for classificado na primeira lista de aprovados, ainda tenho chance? Como o IFMT preenche as vagas remanescentes das cotas?
+R: Excelente pergunta! Para responder à sua pergunta, é importante lembrar que os documentos fornecidos mencionam a concorrência concomitante para as cotas e ampla concorrência. Além disso, o trecho de texto da página 8 do edital-0902025.pdf menciona que "Os candidatos cotistas concorrem pela sua cota e pela ampla concorrência concomitantemente".
+
+Portanto, se você não for classificado na primeira lista de aprovados, ainda há chance de ser considerado para as vagas remanescentes das cotas. Isso ocorre porque os candidatos que não atendem aos requisitos para concorrer às cotas podem competir automaticamente pela ampla concorrência (Trecho de texto da página 8 do edital-0902025.pdf).
+
+Para preencher as vagas remanescentes das cotas, o IFMT provavelmente seguirá o processo de seleção descrito nos documentos. Isso pode incluir a realização de novos sorteios ou a consideração dos candidatos que não atenderam aos requisitos para concorrer às cotas.
+
+Fonte: edital-0902025.pdf, Página: 8
+----------------------------------------
+

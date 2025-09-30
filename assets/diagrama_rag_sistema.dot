@@ -1,0 +1,107 @@
+digraph RAGSystem {
+    rankdir=TB; // De cima para baixo
+    labelloc="t";
+    label="Diagrama Esquemático do Sistema RAG";
+    fontsize=20;
+    node [shape=box, style="rounded,filled", fontname="Helvetica"];
+    edge [fontname="Helvetica", fontsize=10];
+
+    // Subgraph para Inputs do Usuário e Configuração
+    subgraph cluster_inputs {
+        label="Entradas e Configuração";
+        style=filled;
+        color=lightgrey;
+        node [fillcolor=lightyellow];
+
+        Config [label="config.py\n(Parâmetros Globais,\nModelos, Caminhos)", shape=note, fillcolor=khaki];
+        PDFs [label="Pasta 'data/'\n(Arquivos PDF)", shape=folder, fillcolor=lightblue];
+        UserQuery [label="Consulta do Usuário", shape=ellipse, fillcolor=lightgreen];
+        BatchQuestionsFile [label="Arquivo de Texto\n(Perguntas em Lote)", shape=note, fillcolor=lightyellow];
+    }
+
+    // Subgraph para Interfaces de Usuário
+    subgraph cluster_ui {
+        label="Interfaces de Interação";
+        node [fillcolor=lightcyan];
+
+        StreamlitApp [label="rag_web.py\n(Interface Web Streamlit)"];
+        TerminalApp [label="rag_terminal.py\n(Interface de Terminal)"];
+        BatchApp [label="rag_batch_query.py\n(Processamento em Lote)"];
+    }
+
+    // Subgraph para o Núcleo do Sistema RAG
+    subgraph cluster_rag_core_system {
+        label="Núcleo do Sistema RAG - rag_core.py (RAGCore)";
+        style=filled;
+        color=beige;
+        node [fillcolor=moccasin];
+
+        RAGCore [label="RAGCore\n(Orquestração Principal)", shape=component];
+        TextExtractor [label="Extrator de Texto\n(PyMuPDF)", shape=cds];
+        Chunker [label="Divisor de Texto\n(Chunking Logic)", shape=cds];
+        Embedder [label="Gerador de Embeddings\n(SentenceTransformers)", shape=cds];
+        StatusManager [label="Gerenciador de Status\n(processed_files_status.json)", shape=cylinder, fillcolor=lightpink];
+        ChromaDB [label="ChromaDB\n(chroma_db_store/)\n(Chunks + Embeddings)", shape=database, fillcolor=lightgoldenrodyellow];
+    }
+
+    // Subgraph para Serviços Externos e Modelos
+    subgraph cluster_external_services {
+        label="Modelos e Serviços Externos";
+        node [fillcolor=thistle];
+        
+        SentenceTransformerModel [label="Modelo SentenceTransformer\n(downloaded)", shape=box3d];
+        OllamaServer [label="Servidor Ollama\n(LLM Hospedado Localmente)", shape=cylinder, style="dashed,filled", fillcolor=lightskyblue];
+    }
+
+    // Subgraph para Saídas
+    subgraph cluster_outputs {
+        label="Saídas do Sistema";
+        node [fillcolor=palegreen];
+
+        AnswerDisplay [label="Resposta ao Usuário\n(Web/Terminal)", shape=ellipse];
+        BatchResultsFile [label="Arquivo de Saída\n(Resultados em Lote TXT/JSON)", shape=note];
+        DebugChunks [label="Chunks de Depuração\n(Console)", shape=parallelogram, style=dashed];
+    }
+
+    // Fluxos de Configuração e Dados Iniciais
+    Config -> RAGCore [label="lê configurações"];
+    PDFs -> RAGCore [label="lê arquivos PDF"];
+
+    // Fluxo de Processamento de Documentos (dentro do RAGCore)
+    RAGCore -> TextExtractor [label="extrai texto"];
+    TextExtractor -> Chunker [label="texto extraído"];
+    Chunker -> Embedder [label="chunks de texto"];
+    Embedder -> SentenceTransformerModel [label="usa modelo", style=dotted];
+    Embedder -> ChromaDB [label="grava chunks,\nembeddings, metadatos"];
+    RAGCore -> StatusManager [label="lê/grava status"];
+    StatusManager -> RAGCore; // Bidirecional implícito ou status lido de volta
+
+    // Fluxo de Consulta do Usuário
+    UserQuery -> StreamlitApp;
+    UserQuery -> TerminalApp;
+    BatchQuestionsFile -> BatchApp [label="lê perguntas"];
+
+    StreamlitApp -> RAGCore [label="envia consulta"];
+    TerminalApp -> RAGCore [label="envia consulta"];
+    BatchApp -> RAGCore [label="envia consulta"];
+
+    RAGCore -> Embedder [label="para embedding da consulta"];
+    RAGCore -> ChromaDB [label="busca chunks relevantes"];
+    ChromaDB -> RAGCore [label="chunks recuperados"];
+    RAGCore -> OllamaServer [label="envia prompt\n(consulta + chunks)"];
+    OllamaServer -> RAGCore [label="resposta do LLM"];
+    
+    RAGCore -> AnswerDisplay [label="retorna resposta formatada"];
+    StreamlitApp -> AnswerDisplay; // Implícito
+    TerminalApp -> AnswerDisplay;  // Implícito
+    BatchApp -> AnswerDisplay [label="imprime no console"];
+    BatchApp -> BatchResultsFile [label="grava resultados"];
+
+    // Fluxo de Depuração
+    Config -> RAGCore [label="controla depuração"];
+    RAGCore -> DebugChunks [label="se PRINT_DEBUG_CHUNKS=True"];
+
+    // Relações Visuais/Agrupamento
+    {rank=same; StreamlitApp; TerminalApp; BatchApp;}
+    {rank=same; TextExtractor; Chunker; Embedder;}
+}
